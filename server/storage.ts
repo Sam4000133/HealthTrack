@@ -44,6 +44,12 @@ export interface IStorage {
   createBloodPressureMeasurement(data: CreateBloodPressureMeasurement): Promise<MeasurementWithDetails>;
   createWeightMeasurement(data: CreateWeightMeasurement): Promise<MeasurementWithDetails>;
   
+  // Update and delete operations
+  updateGlucoseMeasurement(measurementId: number, data: { value: number, notes?: string | null }): Promise<MeasurementWithDetails>;
+  updateBloodPressureMeasurement(measurementId: number, data: { systolic?: number, diastolic?: number, heartRate?: number | null, notes?: string | null }): Promise<MeasurementWithDetails>;
+  updateWeightMeasurement(measurementId: number, data: { value: number, notes?: string | null }): Promise<MeasurementWithDetails>;
+  deleteMeasurement(id: number): Promise<boolean>;
+  
   // Statistics operations
   getRecentMeasurementsByType(userId: number, type: MeasurementType, days: number): Promise<MeasurementWithDetails[]>;
   getPreviousPeriodMeasurementsByType(userId: number, type: MeasurementType, days: number): Promise<MeasurementWithDetails[]>;
@@ -377,6 +383,39 @@ export class MemStorage implements IStorage {
       glucose: glucoseMeasurement,
     };
   }
+  
+  async updateGlucoseMeasurement(measurementId: number, data: { value: number, notes?: string | null }): Promise<MeasurementWithDetails> {
+    // Get the base measurement
+    const measurement = await this.getMeasurement(measurementId);
+    if (!measurement) {
+      throw new Error(`Measurement with ID ${measurementId} not found`);
+    }
+    
+    // Update the base measurement notes if provided
+    if (data.notes !== undefined) {
+      measurement.notes = data.notes || "";
+      this.measurements.set(measurementId, measurement);
+    }
+    
+    // Find the glucose record
+    const glucose = Array.from(this.glucoseMeasurements.values()).find(
+      g => g.measurementId === measurementId
+    );
+    
+    if (!glucose) {
+      throw new Error(`Glucose measurement for ID ${measurementId} not found`);
+    }
+    
+    // Update glucose value
+    glucose.value = data.value;
+    this.glucoseMeasurements.set(glucose.id, glucose);
+    
+    // Return the updated combined record
+    return {
+      ...measurement,
+      glucose,
+    };
+  }
 
   async createBloodPressureMeasurement(data: CreateBloodPressureMeasurement): Promise<MeasurementWithDetails> {
     // Create base measurement record
@@ -405,6 +444,48 @@ export class MemStorage implements IStorage {
       bloodPressure: bpMeasurement,
     };
   }
+  
+  async updateBloodPressureMeasurement(measurementId: number, data: { systolic?: number, diastolic?: number, heartRate?: number | null, notes?: string | null }): Promise<MeasurementWithDetails> {
+    // Get the base measurement
+    const measurement = await this.getMeasurement(measurementId);
+    if (!measurement) {
+      throw new Error(`Measurement with ID ${measurementId} not found`);
+    }
+    
+    // Update the base measurement notes if provided
+    if (data.notes !== undefined) {
+      measurement.notes = data.notes || "";
+      this.measurements.set(measurementId, measurement);
+    }
+    
+    // Find the blood pressure record
+    const bp = Array.from(this.bloodPressureMeasurements.values()).find(
+      b => b.measurementId === measurementId
+    );
+    
+    if (!bp) {
+      throw new Error(`Blood pressure measurement for ID ${measurementId} not found`);
+    }
+    
+    // Update fields if provided
+    if (data.systolic !== undefined) {
+      bp.systolic = data.systolic;
+    }
+    if (data.diastolic !== undefined) {
+      bp.diastolic = data.diastolic;
+    }
+    if (data.heartRate !== undefined) {
+      bp.heartRate = data.heartRate;
+    }
+    
+    this.bloodPressureMeasurements.set(bp.id, bp);
+    
+    // Return the updated combined record
+    return {
+      ...measurement,
+      bloodPressure: bp,
+    };
+  }
 
   async createWeightMeasurement(data: CreateWeightMeasurement): Promise<MeasurementWithDetails> {
     // Create base measurement record
@@ -430,6 +511,79 @@ export class MemStorage implements IStorage {
       ...measurement,
       weight: weightMeasurement,
     };
+  }
+  
+  async updateWeightMeasurement(measurementId: number, data: { value: number, notes?: string | null }): Promise<MeasurementWithDetails> {
+    // Get the base measurement
+    const measurement = await this.getMeasurement(measurementId);
+    if (!measurement) {
+      throw new Error(`Measurement with ID ${measurementId} not found`);
+    }
+    
+    // Update the base measurement notes if provided
+    if (data.notes !== undefined) {
+      measurement.notes = data.notes || "";
+      this.measurements.set(measurementId, measurement);
+    }
+    
+    // Find the weight record
+    const weight = Array.from(this.weightMeasurements.values()).find(
+      w => w.measurementId === measurementId
+    );
+    
+    if (!weight) {
+      throw new Error(`Weight measurement for ID ${measurementId} not found`);
+    }
+    
+    // Update value
+    weight.value = data.value;
+    this.weightMeasurements.set(weight.id, weight);
+    
+    // Return the updated combined record
+    return {
+      ...measurement,
+      weight,
+    };
+  }
+  
+  async deleteMeasurement(id: number): Promise<boolean> {
+    const measurement = await this.getMeasurement(id);
+    if (!measurement) {
+      return false;
+    }
+    
+    // Remove type-specific measurement data
+    switch (measurement.type) {
+      case 'glucose':
+        const glucose = Array.from(this.glucoseMeasurements.values()).find(
+          g => g.measurementId === id
+        );
+        if (glucose) {
+          this.glucoseMeasurements.delete(glucose.id);
+        }
+        break;
+        
+      case 'blood_pressure':
+        const bp = Array.from(this.bloodPressureMeasurements.values()).find(
+          b => b.measurementId === id
+        );
+        if (bp) {
+          this.bloodPressureMeasurements.delete(bp.id);
+        }
+        break;
+        
+      case 'weight':
+        const weight = Array.from(this.weightMeasurements.values()).find(
+          w => w.measurementId === id
+        );
+        if (weight) {
+          this.weightMeasurements.delete(weight.id);
+        }
+        break;
+    }
+    
+    // Remove base measurement
+    return this.measurements.delete(id);
   }
 
   // Statistics operations

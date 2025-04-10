@@ -217,6 +217,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update an existing measurement
+  app.patch("/api/measurements/:id", isAuthenticated, async (req, res) => {
+    try {
+      const measurementId = parseInt(req.params.id);
+      const measurement = await storage.getMeasurement(measurementId);
+      
+      if (!measurement) {
+        return res.status(404).json({ message: "Misurazione non trovata" });
+      }
+      
+      // Check permissions - users can only update their own data
+      if (req.user!.role === 'user' && req.user!.id !== measurement.userId) {
+        return res.status(403).json({ message: "Non autorizzato a modificare dati di altri utenti" });
+      }
+      
+      // Handle different measurement types
+      if (req.body.type === 'glucose' && req.body.glucose) {
+        const updatedMeasurement = await storage.updateGlucoseMeasurement(measurementId, {
+          notes: req.body.notes,
+          value: req.body.glucose.value
+        });
+        return res.json(updatedMeasurement);
+      } else if (req.body.type === 'blood_pressure' && req.body.bloodPressure) {
+        const updatedMeasurement = await storage.updateBloodPressureMeasurement(measurementId, {
+          notes: req.body.notes,
+          systolic: req.body.bloodPressure.systolic,
+          diastolic: req.body.bloodPressure.diastolic,
+          heartRate: req.body.bloodPressure.heartRate
+        });
+        return res.json(updatedMeasurement);
+      } else if (req.body.type === 'weight' && req.body.weight) {
+        const updatedMeasurement = await storage.updateWeightMeasurement(measurementId, {
+          notes: req.body.notes,
+          value: req.body.weight.value
+        });
+        return res.json(updatedMeasurement);
+      } else {
+        return res.status(400).json({ message: "Dati non validi per l'aggiornamento" });
+      }
+    } catch (error) {
+      console.error("Error updating measurement:", error);
+      res.status(500).json({ message: "Errore durante l'aggiornamento della misurazione" });
+    }
+  });
+
+  // Delete a measurement
+  app.delete("/api/measurements/:id", isAuthenticated, async (req, res) => {
+    try {
+      const measurementId = parseInt(req.params.id);
+      const measurement = await storage.getMeasurement(measurementId);
+      
+      if (!measurement) {
+        return res.status(404).json({ message: "Misurazione non trovata" });
+      }
+      
+      // Check permissions - users can only delete their own data
+      if (req.user!.role === 'user' && req.user!.id !== measurement.userId) {
+        return res.status(403).json({ message: "Non autorizzato a eliminare dati di altri utenti" });
+      }
+      
+      const success = await storage.deleteMeasurement(measurementId);
+      
+      if (success) {
+        return res.status(200).json({ message: "Misurazione eliminata con successo" });
+      } else {
+        return res.status(500).json({ message: "Impossibile eliminare la misurazione" });
+      }
+    } catch (error) {
+      console.error("Error deleting measurement:", error);
+      res.status(500).json({ message: "Errore durante l'eliminazione della misurazione" });
+    }
+  });
+
   // Export measurements as CSV
   app.get("/api/export/measurements", isAuthenticated, async (req, res) => {
     try {
