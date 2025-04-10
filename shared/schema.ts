@@ -17,6 +17,8 @@ export const users = pgTable("users", {
   role: rolesEnum("role").notNull().default('user'),
   email: text("email"),
   createdAt: timestamp("created_at").defaultNow(),
+  twoFactorSecret: text("two_factor_secret"),
+  twoFactorEnabled: boolean("two_factor_enabled").default(false),
 });
 
 // Patients table (for doctor-patient relationships)
@@ -57,6 +59,15 @@ export const weightMeasurements = pgTable("weight_measurements", {
   id: serial("id").primaryKey(),
   measurementId: integer("measurement_id").notNull().references(() => measurements.id),
   value: integer("value").notNull(), // in grams (to avoid float)
+});
+
+// 2FA backup codes table
+export const twoFactorBackupCodes = pgTable("two_factor_backup_codes", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  code: text("code").notNull(),
+  used: boolean("used").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // Insert schemas

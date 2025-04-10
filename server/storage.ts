@@ -48,6 +48,12 @@ export interface IStorage {
   getRecentMeasurementsByType(userId: number, type: MeasurementType, days: number): Promise<MeasurementWithDetails[]>;
   getLatestMeasurementsByType(userId: number): Promise<Record<MeasurementType, MeasurementWithDetails | undefined>>;
   
+  // 2FA operations
+  saveTwoFactorBackupCodes(userId: number, codes: string[]): Promise<void>;
+  getTwoFactorBackupCodes(userId: number): Promise<string[]>;
+  validateTwoFactorBackupCode(userId: number, code: string): Promise<boolean>;
+  removeTwoFactorBackupCodes(userId: number): Promise<void>;
+  
   // Session store
   sessionStore: any; // Using any for now to resolve the session store type issue
 }

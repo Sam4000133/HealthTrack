@@ -9,7 +9,8 @@ import {
   CreateGlucoseMeasurement,
   CreateBloodPressureMeasurement,
   CreateWeightMeasurement,
-  users, patients, measurements, glucoseMeasurements, bloodPressureMeasurements, weightMeasurements
+  users, patients, measurements, glucoseMeasurements, bloodPressureMeasurements, weightMeasurements,
+  twoFactorBackupCodes
 } from "@shared/schema";
 import { IStorage } from "./storage";
 import { db } from "./db";
@@ -352,5 +353,66 @@ export class DatabaseStorage implements IStorage {
     }));
     
     return result;
+  }
+  
+  // 2FA operations
+  async saveTwoFactorBackupCodes(userId: number, codes: string[]): Promise<void> {
+    // First remove any existing codes
+    await db.delete(twoFactorBackupCodes).where(eq(twoFactorBackupCodes.userId, userId));
+    
+    // Insert new codes
+    await Promise.all(
+      codes.map(code => 
+        db.insert(twoFactorBackupCodes).values({
+          userId,
+          code,
+          used: false
+        })
+      )
+    );
+  }
+
+  async getTwoFactorBackupCodes(userId: number): Promise<string[]> {
+    const codes = await db
+      .select()
+      .from(twoFactorBackupCodes)
+      .where(
+        and(
+          eq(twoFactorBackupCodes.userId, userId),
+          eq(twoFactorBackupCodes.used, false)
+        )
+      );
+    
+    return codes.map(code => code.code);
+  }
+
+  async validateTwoFactorBackupCode(userId: number, code: string): Promise<boolean> {
+    const [backupCode] = await db
+      .select()
+      .from(twoFactorBackupCodes)
+      .where(
+        and(
+          eq(twoFactorBackupCodes.userId, userId),
+          eq(twoFactorBackupCodes.code, code),
+          eq(twoFactorBackupCodes.used, false)
+        )
+      )
+      .limit(1);
+    
+    if (backupCode) {
+      // Mark the code as used
+      await db
+        .update(twoFactorBackupCodes)
+        .set({ used: true })
+        .where(eq(twoFactorBackupCodes.id, backupCode.id));
+      
+      return true;
+    }
+    
+    return false;
+  }
+
+  async removeTwoFactorBackupCodes(userId: number): Promise<void> {
+    await db.delete(twoFactorBackupCodes).where(eq(twoFactorBackupCodes.userId, userId));
   }
 }
