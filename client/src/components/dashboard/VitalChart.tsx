@@ -64,31 +64,49 @@ export default function VitalChart({
   }, []);
 
   useEffect(() => {
-    if (isLoading || !chartRef.current || !data.length) return;
+    if (isLoading || !chartRef.current) return;
+
+    // Prepare the last 7 days (ensure we always show 7 days even if some days have no data)
+    const today = new Date();
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - (6 - i)); // 6 days ago to today (7 days total)
+      return {
+        date,
+        dateString: format(date, "dd/MM")
+      };
+    });
 
     // Sort data by timestamp
     const sortedData = [...data].sort((a, b) => {
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
 
-    // Create labels (dates)
-    const labels = sortedData.map(item => 
-      format(new Date(item.timestamp), "dd/MM")
-    );
+    // Create labels for all 7 days
+    const labels = last7Days.map(day => day.dateString);
 
     // Create datasets based on measurement type
     let datasets = [];
     
     if (type === "glucose") {
-      const values = sortedData.map(item => {
-        const value = getValue(item) as number;
-        return value;
+      // Map data to the 7 days
+      const mappedData = last7Days.map(day => {
+        // Find a measurement from this day (if any)
+        const measurement = sortedData.find(item => {
+          const itemDate = new Date(item.timestamp);
+          return itemDate.getDate() === day.date.getDate() && 
+                 itemDate.getMonth() === day.date.getMonth() && 
+                 itemDate.getFullYear() === day.date.getFullYear();
+        });
+        
+        // Return the value or null if no measurement for this day
+        return measurement ? (getValue(measurement) as number) : null;
       });
 
       datasets = [
         {
           label: "Glicemia (mg/dL)",
-          data: values,
+          data: mappedData,
           borderColor: "#3b82f6",
           backgroundColor: "rgba(59, 130, 246, 0.2)",
           pointBackgroundColor: "#3b82f6",
@@ -121,25 +139,50 @@ export default function VitalChart({
         });
       }
     } else if (type === "blood_pressure") {
-      const systolicValues = sortedData.map(item => {
-        const value = getValue(item) as { systolic: number; diastolic: number; heartRate: number };
-        return value.systolic;
+      // Map data to the 7 days for each value
+      const mappedSystolic = last7Days.map(day => {
+        const measurement = sortedData.find(item => {
+          const itemDate = new Date(item.timestamp);
+          return itemDate.getDate() === day.date.getDate() && 
+                 itemDate.getMonth() === day.date.getMonth() && 
+                 itemDate.getFullYear() === day.date.getFullYear();
+        });
+        
+        return measurement 
+          ? (getValue(measurement) as { systolic: number; diastolic: number; heartRate: number }).systolic 
+          : null;
       });
 
-      const diastolicValues = sortedData.map(item => {
-        const value = getValue(item) as { systolic: number; diastolic: number; heartRate: number };
-        return value.diastolic;
+      const mappedDiastolic = last7Days.map(day => {
+        const measurement = sortedData.find(item => {
+          const itemDate = new Date(item.timestamp);
+          return itemDate.getDate() === day.date.getDate() && 
+                 itemDate.getMonth() === day.date.getMonth() && 
+                 itemDate.getFullYear() === day.date.getFullYear();
+        });
+        
+        return measurement 
+          ? (getValue(measurement) as { systolic: number; diastolic: number; heartRate: number }).diastolic 
+          : null;
       });
       
-      const heartRateValues = sortedData.map(item => {
-        const value = getValue(item) as { systolic: number; diastolic: number; heartRate: number };
-        return value.heartRate;
+      const mappedHeartRate = last7Days.map(day => {
+        const measurement = sortedData.find(item => {
+          const itemDate = new Date(item.timestamp);
+          return itemDate.getDate() === day.date.getDate() && 
+                 itemDate.getMonth() === day.date.getMonth() && 
+                 itemDate.getFullYear() === day.date.getFullYear();
+        });
+        
+        return measurement 
+          ? (getValue(measurement) as { systolic: number; diastolic: number; heartRate: number }).heartRate 
+          : null;
       });
 
       datasets = [
         {
           label: "Sistolica (mmHg)",
-          data: systolicValues,
+          data: mappedSystolic,
           borderColor: "#ef4444",
           backgroundColor: "rgba(239, 68, 68, 0.1)",
           pointBackgroundColor: "#ef4444",
@@ -147,7 +190,7 @@ export default function VitalChart({
         },
         {
           label: "Diastolica (mmHg)",
-          data: diastolicValues,
+          data: mappedDiastolic,
           borderColor: "#10b981",
           backgroundColor: "rgba(16, 185, 129, 0.1)",
           pointBackgroundColor: "#10b981",
@@ -155,7 +198,7 @@ export default function VitalChart({
         },
         {
           label: "Battito (BPM)",
-          data: heartRateValues,
+          data: mappedHeartRate,
           borderColor: "#f97316",
           backgroundColor: "rgba(249, 115, 22, 0.1)",
           pointBackgroundColor: "#f97316",
@@ -163,15 +206,24 @@ export default function VitalChart({
         }
       ];
     } else if (type === "weight") {
-      const values = sortedData.map(item => {
-        const value = getValue(item) as number;
-        return value / 1000; // Convert from grams to kg
+      // Map data to the 7 days
+      const mappedData = last7Days.map(day => {
+        // Find a measurement from this day (if any)
+        const measurement = sortedData.find(item => {
+          const itemDate = new Date(item.timestamp);
+          return itemDate.getDate() === day.date.getDate() && 
+                 itemDate.getMonth() === day.date.getMonth() && 
+                 itemDate.getFullYear() === day.date.getFullYear();
+        });
+        
+        // Return the value or null if no measurement for this day
+        return measurement ? (getValue(measurement) as number) / 1000 : null; // Convert from grams to kg
       });
 
       datasets = [
         {
           label: "Peso (kg)",
-          data: values,
+          data: mappedData,
           borderColor: "#10b981",
           backgroundColor: "rgba(16, 185, 129, 0.2)",
           pointBackgroundColor: "#10b981",

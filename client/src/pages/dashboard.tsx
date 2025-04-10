@@ -6,6 +6,7 @@ import StatsCard from "@/components/dashboard/StatsCard";
 import VitalChart from "@/components/dashboard/VitalChart";
 import MeasurementTable from "@/components/dashboard/MeasurementTable";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { Plus } from "lucide-react";
 import { MeasurementWithDetails } from "@shared/schema";
@@ -211,44 +212,51 @@ export default function Dashboard() {
           
           {/* Charts Section */}
           <div className="mt-6">
-            {/* First Row - Glucose and Blood Pressure */}
-            <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 mb-5">
+            {/* Charts stacked vertically */}
+            <div className="grid grid-cols-1 gap-5 mb-5">
               {/* Blood Glucose Chart */}
-              <VitalChart
-                title="Andamento Glicemia"
-                subtitle="Ultimi 7 giorni"
-                data={glucoseData || []}
-                isLoading={isGlucoseLoading}
-                type="glucose"
-                getValue={getGlucoseValue}
-                upperLimit={GLUCOSE_THRESHOLDS.HIGH}
-                lowerLimit={GLUCOSE_THRESHOLDS.LOW}
-              />
+              <Card>
+                <CardContent className="p-0">
+                  <VitalChart
+                    title="Andamento Glicemia"
+                    subtitle="Ultimi 7 giorni"
+                    data={glucoseData || []}
+                    isLoading={isGlucoseLoading}
+                    type="glucose"
+                    getValue={getGlucoseValue}
+                    upperLimit={GLUCOSE_THRESHOLDS.HIGH}
+                    lowerLimit={GLUCOSE_THRESHOLDS.LOW}
+                  />
+                </CardContent>
+              </Card>
               
               {/* Blood Pressure Chart */}
-              <VitalChart
-                title="Andamento Pressione"
-                subtitle="Ultimi 7 giorni"
-                data={bpData || []}
-                isLoading={isBPLoading}
-                type="blood_pressure"
-                getValue={getBloodPressureValue}
-              />
-            </div>
-            
-            {/* Second Row - Weight chart */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <Card>
+                <CardContent className="p-0">
+                  <VitalChart
+                    title="Andamento Pressione"
+                    subtitle="Ultimi 7 giorni"
+                    data={bpData || []}
+                    isLoading={isBPLoading}
+                    type="blood_pressure"
+                    getValue={getBloodPressureValue}
+                  />
+                </CardContent>
+              </Card>
+              
               {/* Weight Chart */}
-              <div className="lg:col-span-1">
-                <VitalChart
-                  title="Andamento Peso"
-                  subtitle="Ultimi 7 giorni"
-                  data={weightData || []}
-                  isLoading={isWeightLoading}
-                  type="weight"
-                  getValue={getWeightValue}
-                />
-              </div>
+              <Card>
+                <CardContent className="p-0">
+                  <VitalChart
+                    title="Andamento Peso"
+                    subtitle="Ultimi 7 giorni"
+                    data={weightData || []}
+                    isLoading={isWeightLoading}
+                    type="weight"
+                    getValue={getWeightValue}
+                  />
+                </CardContent>
+              </Card>
             </div>
           </div>
           
