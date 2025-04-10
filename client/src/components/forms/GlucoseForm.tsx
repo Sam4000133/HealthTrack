@@ -23,7 +23,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { format, parse } from "date-fns";
 import { it } from "date-fns/locale";
-import { toast } from "@/components/ui/toast";
+import { useToast } from "@/hooks/use-toast";
 
 
 // Create a custom schema for the form
@@ -101,6 +101,7 @@ export default function GlucoseForm({ timestamp, notes, onCancel, onSuccess }: G
         return await res.json();
       } catch (error) {
         console.error("Error saving measurement:", error);
+        const { toast } = useToast();
         toast({
           title: "Errore",
           description: "Si è verificato un errore durante il salvataggio della misurazione",
