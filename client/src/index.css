@@ -10,4 +10,27 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+  
+  /* Stile personalizzato per le frecce degli input numerici */
+  /* Per browser Webkit (Chrome, Safari, ecc.) */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    opacity: 1;
+    background: #f3f4f6; /* Colore di sfondo chiaro */
+    border-left: 1px solid #d1d5db;
+    height: 38px;
+    position: relative;
+    right: 0;
+  }
+  
+  /* Cambiamo anche il cursore per renderlo più chiaro che è interattivo */
+  input[type="number"]::-webkit-inner-spin-button {
+    cursor: pointer;
+  }
+
+  .dark input[type="number"]::-webkit-inner-spin-button,
+  .dark input[type="number"]::-webkit-outer-spin-button {
+    background: #374151; /* Sfondo più scuro per tema dark */
+    border-left: 1px solid #4b5563;
+  }
 }
