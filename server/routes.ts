@@ -143,7 +143,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Glucose measurement routes
-  app.post("/api/measurements/glucose", isAuthenticated, async (req, res) => {
+  const validateInput = (req: Request, res: Response, next: NextFunction) => {
+  const { value, notes } = req.body;
+  
+  if (typeof value !== 'number' || value < 20 || value > 600) {
+    return res.status(400).json({ message: "Valore glicemia non valido" });
+  }
+  
+  if (notes && typeof notes !== 'string') {
+    return res.status(400).json({ message: "Note non valide" });
+  }
+  
+  next();
+};
+
+app.post("/api/measurements/glucose", isAuthenticated, validateInput, async (req, res) => {
     try {
       const userId = req.body.userId || req.user!.id;
       

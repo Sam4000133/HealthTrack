@@ -19,10 +19,12 @@ import { createGlucoseMeasurementSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import { GLUCOSE_THRESHOLDS } from "@shared/constants";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { format, parse } from "date-fns";
 import { it } from "date-fns/locale";
+import { toast } from "@/components/ui/toast";
+
 
 // Create a custom schema for the form
 const glucoseFormSchema = z.object({
@@ -45,6 +47,7 @@ export default function GlucoseForm({ timestamp, notes, onCancel, onSuccess }: G
   const { user } = useAuth();
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [formattedDateTime, setFormattedDateTime] = useState("");
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     // Update the current date and time when the component mounts
@@ -93,19 +96,28 @@ export default function GlucoseForm({ timestamp, notes, onCancel, onSuccess }: G
         notes: noteText,
       };
 
-      const res = await apiRequest("POST", "/api/measurements/glucose", measurementData);
-      return await res.json();
+      try {
+        const res = await apiRequest("POST", "/api/measurements/glucose", measurementData);
+        return await res.json();
+      } catch (error) {
+        console.error("Error saving measurement:", error);
+        toast({
+          title: "Errore",
+          description: "Si è verificato un errore durante il salvataggio della misurazione",
+          variant: "destructive",
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/measurements"] });
       queryClient.invalidateQueries({ queryKey: ["/api/measurements/latest"] });
       queryClient.invalidateQueries({ queryKey: ["/api/measurements/stats/glucose"] });
-      
+
       // Aggiorna la data/ora corrente
       const now = new Date();
       setCurrentDateTime(now);
       setFormattedDateTime(format(now, "dd MMMM yyyy, HH:mm", { locale: it }));
-      
+
       form.reset({
         value: 100,
         notes: "",
@@ -154,7 +166,7 @@ export default function GlucoseForm({ timestamp, notes, onCancel, onSuccess }: G
             </FormItem>
           )}
         />
-        
+
         {customDate ? (
           <FormField
             control={form.control}
