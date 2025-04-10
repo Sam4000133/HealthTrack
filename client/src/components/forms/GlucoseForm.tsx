@@ -60,8 +60,19 @@ export default function GlucoseForm({ timestamp, notes, onCancel, onSuccess }: G
     defaultValues: {
       value: 100,
       notes: "",
+      customDate: false,
+      dateTime: new Date(),
     },
   });
+
+  const customDate = form.watch("customDate");
+  const selectedDateTime = form.watch("dateTime");
+
+  useEffect(() => {
+    if (selectedDateTime && customDate) {
+      setFormattedDateTime(format(selectedDateTime, "dd MMMM yyyy, HH:mm", { locale: it }));
+    }
+  }, [selectedDateTime, customDate]);
 
   const saveMutation = useMutation({
     mutationFn: async (formData: z.infer<typeof glucoseFormSchema>) => {
@@ -70,10 +81,15 @@ export default function GlucoseForm({ timestamp, notes, onCancel, onSuccess }: G
       // Get notes from form
       const noteText = formData.notes || "";
 
+      // Determine which timestamp to use
+      const timestamp = formData.customDate && formData.dateTime 
+        ? formData.dateTime 
+        : currentDateTime;
+
       const measurementData = {
         userId: user.id,
         value: formData.value,
-        timestamp: currentDateTime,
+        timestamp: timestamp,
         notes: noteText,
       };
 
@@ -84,9 +100,17 @@ export default function GlucoseForm({ timestamp, notes, onCancel, onSuccess }: G
       queryClient.invalidateQueries({ queryKey: ["/api/measurements"] });
       queryClient.invalidateQueries({ queryKey: ["/api/measurements/latest"] });
       queryClient.invalidateQueries({ queryKey: ["/api/measurements/stats/glucose"] });
+      
+      // Aggiorna la data/ora corrente
+      const now = new Date();
+      setCurrentDateTime(now);
+      setFormattedDateTime(format(now, "dd MMMM yyyy, HH:mm", { locale: it }));
+      
       form.reset({
         value: 100,
         notes: "",
+        customDate: false,
+        dateTime: now,
       });
       onSuccess();
     },
@@ -99,11 +123,86 @@ export default function GlucoseForm({ timestamp, notes, onCancel, onSuccess }: G
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md mb-4">
-          <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
-            Data e ora: {formattedDateTime}
-          </p>
-        </div>
+        <FormField
+          control={form.control}
+          name="customDate"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+              <div className="space-y-0.5">
+                <FormLabel>Usa data e ora personalizzate</FormLabel>
+                <FormDescription>
+                  Attiva per inserire una misurazione con data e ora diverse da quelle attuali
+                </FormDescription>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked);
+                    if (!checked) {
+                      // Reset to current date time when turning off
+                      const now = new Date();
+                      setCurrentDateTime(now);
+                      setFormattedDateTime(
+                        format(now, "dd MMMM yyyy, HH:mm", { locale: it })
+                      );
+                      form.setValue("dateTime", now);
+                    }
+                  }}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        
+        {customDate ? (
+          <FormField
+            control={form.control}
+            name="dateTime"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Data e ora della misurazione</FormLabel>
+                <FormControl>
+                  <div className="flex space-x-2">
+                    <Input
+                      type="date"
+                      value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
+                      onChange={(e) => {
+                        const date = e.target.value;
+                        if (date) {
+                          const time = field.value ? format(field.value, "HH:mm") : "00:00";
+                          const newDate = parse(`${date} ${time}`, "yyyy-MM-dd HH:mm", new Date());
+                          field.onChange(newDate);
+                        }
+                      }}
+                      className="w-full"
+                    />
+                    <Input
+                      type="time"
+                      value={field.value ? format(field.value, "HH:mm") : ""}
+                      onChange={(e) => {
+                        const time = e.target.value;
+                        if (time) {
+                          const date = field.value ? format(field.value, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd");
+                          const newDate = parse(`${date} ${time}`, "yyyy-MM-dd HH:mm", new Date());
+                          field.onChange(newDate);
+                        }
+                      }}
+                      className="w-full"
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md mb-4">
+            <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+              Data e ora: {formattedDateTime}
+            </p>
+          </div>
+        )}
 
         <FormField
           control={form.control}
