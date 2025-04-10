@@ -259,9 +259,9 @@ export default function VitalChart({
             </div>
           )}
         </div>
-        <div className="bg-gray-50 dark:bg-gray-700 px-5 py-2 mt-2">
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            <span className="font-medium">Media:</span> {isLoading ? <Skeleton className="h-4 w-16 inline-block" /> : calculateAverage()}
+        <div className="border-t border-gray-200 dark:border-gray-700 px-5 py-3">
+          <div className="text-sm font-medium">
+            Media: <span className="text-gray-700 dark:text-gray-300">{isLoading ? <Skeleton className="h-4 w-16 inline-block" /> : calculateAverage()}</span>
           </div>
         </div>
       </div>
