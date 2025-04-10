@@ -60,7 +60,8 @@ export default function History() {
   const [sortBy, setSortBy] = useState<string>("timestamp");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [measurementToDelete, setMeasurementToDelete] = useState<number | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedMeasurement, setSelectedMeasurement] = useState<MeasurementWithDetails | null>(null);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -97,14 +98,88 @@ export default function History() {
     }
   });
   
+  const updateGlucoseMutation = useMutation({
+    mutationFn: async (data: any) => {
+      await apiRequest("PATCH", `/api/measurements/${data.id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/measurements"] });
+      toast({
+        title: "Misurazione aggiornata",
+        description: "La misurazione è stata aggiornata con successo",
+        variant: "default",
+      });
+      setEditModalOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante l'aggiornamento della misurazione",
+        variant: "destructive",
+      });
+      console.error("Error updating measurement:", error);
+    }
+  });
+  
+  const updateBloodPressureMutation = useMutation({
+    mutationFn: async (data: any) => {
+      await apiRequest("PATCH", `/api/measurements/${data.id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/measurements"] });
+      toast({
+        title: "Misurazione aggiornata",
+        description: "La misurazione è stata aggiornata con successo",
+        variant: "default",
+      });
+      setEditModalOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante l'aggiornamento della misurazione",
+        variant: "destructive",
+      });
+      console.error("Error updating measurement:", error);
+    }
+  });
+  
+  const updateWeightMutation = useMutation({
+    mutationFn: async (data: any) => {
+      await apiRequest("PATCH", `/api/measurements/${data.id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/measurements"] });
+      toast({
+        title: "Misurazione aggiornata",
+        description: "La misurazione è stata aggiornata con successo",
+        variant: "default",
+      });
+      setEditModalOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore durante l'aggiornamento della misurazione",
+        variant: "destructive",
+      });
+      console.error("Error updating measurement:", error);
+    }
+  });
+  
   const handleDeleteClick = (id: number) => {
-    setMeasurementToDelete(id);
+    setSelectedMeasurement({ id } as MeasurementWithDetails);
     setDeleteModalOpen(true);
   };
   
+  const handleEditClick = (measurement: MeasurementWithDetails) => {
+    setSelectedMeasurement(measurement);
+    setEditModalOpen(true);
+  };
+  
   const handleConfirmDelete = () => {
-    if (measurementToDelete) {
-      deleteMutation.mutate(measurementToDelete);
+    if (selectedMeasurement?.id) {
+      deleteMutation.mutate(selectedMeasurement.id);
     }
   };
 
@@ -245,7 +320,7 @@ export default function History() {
           variant="ghost" 
           className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/40"
           title="Modifica"
-          onClick={() => window.location.href = `/measurements?edit=${row.id}&type=${row.type}`}
+          onClick={() => handleEditClick(row)}
         >
           <Edit className="h-4 w-4" />
         </Button>
@@ -449,6 +524,298 @@ export default function History() {
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* Modal per modifica glicemia */}
+      <Dialog open={editModalOpen && selectedMeasurement?.type === "glucose"} onOpenChange={(open) => !open && setEditModalOpen(false)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Modifica Misurazione Glicemia</DialogTitle>
+            <DialogDescription>
+              Modifica i dettagli della misurazione di glicemia.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="glucose-value" className="text-right">
+                Valore
+              </Label>
+              <Input
+                id="glucose-value"
+                type="number"
+                className="col-span-3"
+                defaultValue={selectedMeasurement?.glucose?.value}
+                onChange={(e) => {
+                  if (selectedMeasurement) {
+                    setSelectedMeasurement({
+                      ...selectedMeasurement,
+                      glucose: {
+                        ...selectedMeasurement.glucose,
+                        value: parseInt(e.target.value)
+                      }
+                    });
+                  }
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="notes" className="text-right">
+                Note
+              </Label>
+              <Input
+                id="notes"
+                className="col-span-3"
+                defaultValue={selectedMeasurement?.notes || ""}
+                onChange={(e) => {
+                  if (selectedMeasurement) {
+                    setSelectedMeasurement({
+                      ...selectedMeasurement,
+                      notes: e.target.value
+                    });
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setEditModalOpen(false)}
+            >
+              Annulla
+            </Button>
+            <Button
+              onClick={() => {
+                if (selectedMeasurement) {
+                  updateGlucoseMutation.mutate({
+                    id: selectedMeasurement.id,
+                    type: selectedMeasurement.type,
+                    notes: selectedMeasurement.notes,
+                    glucose: selectedMeasurement.glucose
+                  });
+                }
+              }}
+              disabled={updateGlucoseMutation.isPending}
+            >
+              {updateGlucoseMutation.isPending ? (
+                <span className="flex items-center">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Salvataggio...
+                </span>
+              ) : "Salva modifiche"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal per modifica pressione */}
+      <Dialog open={editModalOpen && selectedMeasurement?.type === "blood_pressure"} onOpenChange={(open) => !open && setEditModalOpen(false)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Modifica Misurazione Pressione</DialogTitle>
+            <DialogDescription>
+              Modifica i dettagli della misurazione di pressione sanguigna.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="systolic" className="text-right">
+                Sistolica
+              </Label>
+              <Input
+                id="systolic"
+                type="number"
+                className="col-span-3"
+                defaultValue={selectedMeasurement?.bloodPressure?.systolic}
+                onChange={(e) => {
+                  if (selectedMeasurement) {
+                    setSelectedMeasurement({
+                      ...selectedMeasurement,
+                      bloodPressure: {
+                        ...selectedMeasurement.bloodPressure,
+                        systolic: parseInt(e.target.value)
+                      }
+                    });
+                  }
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="diastolic" className="text-right">
+                Diastolica
+              </Label>
+              <Input
+                id="diastolic"
+                type="number"
+                className="col-span-3"
+                defaultValue={selectedMeasurement?.bloodPressure?.diastolic}
+                onChange={(e) => {
+                  if (selectedMeasurement) {
+                    setSelectedMeasurement({
+                      ...selectedMeasurement,
+                      bloodPressure: {
+                        ...selectedMeasurement.bloodPressure,
+                        diastolic: parseInt(e.target.value)
+                      }
+                    });
+                  }
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="heart-rate" className="text-right">
+                Freq. cardiaca
+              </Label>
+              <Input
+                id="heart-rate"
+                type="number"
+                className="col-span-3"
+                defaultValue={selectedMeasurement?.bloodPressure?.heartRate}
+                onChange={(e) => {
+                  if (selectedMeasurement) {
+                    setSelectedMeasurement({
+                      ...selectedMeasurement,
+                      bloodPressure: {
+                        ...selectedMeasurement.bloodPressure,
+                        heartRate: parseInt(e.target.value)
+                      }
+                    });
+                  }
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="notes-bp" className="text-right">
+                Note
+              </Label>
+              <Input
+                id="notes-bp"
+                className="col-span-3"
+                defaultValue={selectedMeasurement?.notes || ""}
+                onChange={(e) => {
+                  if (selectedMeasurement) {
+                    setSelectedMeasurement({
+                      ...selectedMeasurement,
+                      notes: e.target.value
+                    });
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setEditModalOpen(false)}
+            >
+              Annulla
+            </Button>
+            <Button
+              onClick={() => {
+                if (selectedMeasurement) {
+                  updateBloodPressureMutation.mutate({
+                    id: selectedMeasurement.id,
+                    type: selectedMeasurement.type,
+                    notes: selectedMeasurement.notes,
+                    bloodPressure: selectedMeasurement.bloodPressure
+                  });
+                }
+              }}
+              disabled={updateBloodPressureMutation.isPending}
+            >
+              {updateBloodPressureMutation.isPending ? (
+                <span className="flex items-center">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Salvataggio...
+                </span>
+              ) : "Salva modifiche"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal per modifica peso */}
+      <Dialog open={editModalOpen && selectedMeasurement?.type === "weight"} onOpenChange={(open) => !open && setEditModalOpen(false)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Modifica Misurazione Peso</DialogTitle>
+            <DialogDescription>
+              Modifica i dettagli della misurazione del peso.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="weight-value" className="text-right">
+                Peso (kg)
+              </Label>
+              <Input
+                id="weight-value"
+                type="number"
+                step="0.1"
+                className="col-span-3"
+                defaultValue={selectedMeasurement?.weight ? (selectedMeasurement.weight.value / 1000).toFixed(1) : ""}
+                onChange={(e) => {
+                  if (selectedMeasurement) {
+                    const weightKg = parseFloat(e.target.value);
+                    setSelectedMeasurement({
+                      ...selectedMeasurement,
+                      weight: {
+                        ...selectedMeasurement.weight,
+                        value: Math.round(weightKg * 1000) // Convertire in grammi
+                      }
+                    });
+                  }
+                }}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="notes-weight" className="text-right">
+                Note
+              </Label>
+              <Input
+                id="notes-weight"
+                className="col-span-3"
+                defaultValue={selectedMeasurement?.notes || ""}
+                onChange={(e) => {
+                  if (selectedMeasurement) {
+                    setSelectedMeasurement({
+                      ...selectedMeasurement,
+                      notes: e.target.value
+                    });
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setEditModalOpen(false)}
+            >
+              Annulla
+            </Button>
+            <Button
+              onClick={() => {
+                if (selectedMeasurement) {
+                  updateWeightMutation.mutate({
+                    id: selectedMeasurement.id,
+                    type: selectedMeasurement.type,
+                    notes: selectedMeasurement.notes,
+                    weight: selectedMeasurement.weight
+                  });
+                }
+              }}
+              disabled={updateWeightMutation.isPending}
+            >
+              {updateWeightMutation.isPending ? (
+                <span className="flex items-center">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Salvataggio...
+                </span>
+              ) : "Salva modifiche"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
