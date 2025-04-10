@@ -66,6 +66,28 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
               </a>
             </Link>
             
+            {/* History */}
+            <Link href="/history">
+              <a 
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                  currentPage === 'history' 
+                    ? 'bg-primary/10 text-primary dark:text-white dark:bg-blue-600/70 font-bold border-l-4 border-blue-500' 
+                    : 'text-gray-700 dark:text-gray-200'
+                }`}
+              >
+                <svg 
+                  className={`mr-3 h-6 w-6 ${currentPage === 'history' ? 'text-primary dark:text-white' : 'text-gray-400 dark:text-gray-400'}`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24" 
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Storico
+              </a>
+            </Link>
+            
             {/* Statistics */}
             <Link href="/statistics">
               <a 

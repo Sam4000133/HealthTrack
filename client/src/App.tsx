@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/lib/protected-route";
 import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
 import Measurements from "@/pages/measurements";
+import History from "@/pages/history";
 import Statistics from "@/pages/statistics";
 import Patients from "@/pages/patients";
 import UserManagement from "@/pages/user-management";
@@ -20,6 +21,7 @@ function Router() {
     <Switch>
       <ProtectedRoute path="/" component={Dashboard} />
       <ProtectedRoute path="/measurements" component={Measurements} />
+      <ProtectedRoute path="/history" component={History} />
       <ProtectedRoute path="/statistics" component={Statistics} />
       <ProtectedRoute path="/patients" component={Patients} roles={["admin", "doctor"]} />
       <ProtectedRoute path="/users" component={UserManagement} roles={["admin"]} />

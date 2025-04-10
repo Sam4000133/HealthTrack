@@ -14,13 +14,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
 import { createGlucoseMeasurementSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import { GLUCOSE_THRESHOLDS } from "@shared/constants";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { it } from "date-fns/locale";
 
 // Create a custom schema for the form
@@ -29,6 +30,8 @@ const glucoseFormSchema = z.object({
     .min(GLUCOSE_THRESHOLDS.LOW, `Il valore deve essere almeno ${GLUCOSE_THRESHOLDS.LOW} mg/dL`)
     .max(600, "Il valore non può superare 600 mg/dL"),
   notes: z.string().optional(),
+  customDate: z.boolean().default(false),
+  dateTime: z.date().optional(),
 });
 
 interface GlucoseFormProps {
