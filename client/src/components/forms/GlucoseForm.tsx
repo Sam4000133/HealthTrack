@@ -45,6 +45,7 @@ interface GlucoseFormProps {
 
 export default function GlucoseForm({ timestamp, notes, onCancel, onSuccess }: GlucoseFormProps) {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [formattedDateTime, setFormattedDateTime] = useState("");
   const queryClient = useQueryClient();
@@ -101,7 +102,6 @@ export default function GlucoseForm({ timestamp, notes, onCancel, onSuccess }: G
         return await res.json();
       } catch (error) {
         console.error("Error saving measurement:", error);
-        const { toast } = useToast();
         toast({
           title: "Errore",
           description: "Si è verificato un errore durante il salvataggio della misurazione",
