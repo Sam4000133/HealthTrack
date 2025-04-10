@@ -26,7 +26,6 @@ const weightFormSchema = z.object({
   weightKg: z.number()
     .min(1, "Il peso deve essere almeno 1 kg")
     .max(300, "Il peso non può superare 300 kg"),
-  condition: z.enum(["rest", "activity"]),
   notes: z.string().optional(),
 });
 
@@ -55,7 +54,6 @@ export default function WeightForm({ timestamp, notes, onCancel, onSuccess }: We
     resolver: zodResolver(weightFormSchema),
     defaultValues: {
       weightKg: 70,
-      condition: "rest",
       notes: "",
     },
   });
@@ -67,14 +65,8 @@ export default function WeightForm({ timestamp, notes, onCancel, onSuccess }: We
       // Convert kg to grams for the API
       const valueInGrams = Math.round(formData.weightKg * 1000);
 
-      // Prepare notes with condition information
-      let noteText = formData.notes || "";
-      const conditionText = formData.condition === "rest" ? "A riposo" : "Dopo attività fisica";
-      if (noteText) {
-        noteText = `${conditionText}. ${noteText}`;
-      } else {
-        noteText = conditionText;
-      }
+      // Get notes from form
+      const noteText = formData.notes || "";
 
       const measurementData = {
         userId: user.id,
@@ -92,7 +84,6 @@ export default function WeightForm({ timestamp, notes, onCancel, onSuccess }: We
       queryClient.invalidateQueries({ queryKey: ["/api/measurements/stats/weight"] });
       form.reset({
         weightKg: 70,
-        condition: "rest",
         notes: "",
       });
       onSuccess();
@@ -140,36 +131,7 @@ export default function WeightForm({ timestamp, notes, onCancel, onSuccess }: We
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="condition"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel>Condizione</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="flex flex-col space-y-1"
-                >
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="rest" />
-                    </FormControl>
-                    <FormLabel className="font-normal">A riposo</FormLabel>
-                  </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="activity" />
-                    </FormControl>
-                    <FormLabel className="font-normal">Dopo attività fisica</FormLabel>
-                  </FormItem>
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
 
         <FormField
           control={form.control}

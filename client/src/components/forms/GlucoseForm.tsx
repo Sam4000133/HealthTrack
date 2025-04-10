@@ -28,7 +28,6 @@ const glucoseFormSchema = z.object({
   value: z.number()
     .min(GLUCOSE_THRESHOLDS.LOW, `Il valore deve essere almeno ${GLUCOSE_THRESHOLDS.LOW} mg/dL`)
     .max(600, "Il valore non può superare 600 mg/dL"),
-  condition: z.enum(["rest", "activity"]),
   notes: z.string().optional(),
 });
 
@@ -57,7 +56,6 @@ export default function GlucoseForm({ timestamp, notes, onCancel, onSuccess }: G
     resolver: zodResolver(glucoseFormSchema),
     defaultValues: {
       value: 100,
-      condition: "rest",
       notes: "",
     },
   });
@@ -66,14 +64,8 @@ export default function GlucoseForm({ timestamp, notes, onCancel, onSuccess }: G
     mutationFn: async (formData: z.infer<typeof glucoseFormSchema>) => {
       if (!user) throw new Error("Utente non autenticato");
 
-      // Prepare notes with condition information
-      let noteText = formData.notes || "";
-      const conditionText = formData.condition === "rest" ? "A riposo" : "Dopo attività fisica";
-      if (noteText) {
-        noteText = `${conditionText}. ${noteText}`;
-      } else {
-        noteText = conditionText;
-      }
+      // Get notes from form
+      const noteText = formData.notes || "";
 
       const measurementData = {
         userId: user.id,
@@ -91,7 +83,6 @@ export default function GlucoseForm({ timestamp, notes, onCancel, onSuccess }: G
       queryClient.invalidateQueries({ queryKey: ["/api/measurements/stats/glucose"] });
       form.reset({
         value: 100,
-        condition: "rest",
         notes: "",
       });
       onSuccess();
@@ -138,36 +129,7 @@ export default function GlucoseForm({ timestamp, notes, onCancel, onSuccess }: G
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="condition"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel>Condizione</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="flex flex-col space-y-1"
-                >
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="rest" />
-                    </FormControl>
-                    <FormLabel className="font-normal">A riposo</FormLabel>
-                  </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="activity" />
-                    </FormControl>
-                    <FormLabel className="font-normal">Dopo attività fisica</FormLabel>
-                  </FormItem>
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
 
         <FormField
           control={form.control}
