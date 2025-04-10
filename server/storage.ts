@@ -46,6 +46,7 @@ export interface IStorage {
   
   // Statistics operations
   getRecentMeasurementsByType(userId: number, type: MeasurementType, days: number): Promise<MeasurementWithDetails[]>;
+  getPreviousPeriodMeasurementsByType(userId: number, type: MeasurementType, days: number): Promise<MeasurementWithDetails[]>;
   getLatestMeasurementsByType(userId: number): Promise<Record<MeasurementType, MeasurementWithDetails | undefined>>;
   
   // 2FA operations
@@ -447,6 +448,27 @@ export class MemStorage implements IStorage {
     
     return Promise.all(
       recentMeasurements.map(m => this.enrichMeasurementWithDetails(m))
+    );
+  }
+  
+  async getPreviousPeriodMeasurementsByType(
+    userId: number, 
+    type: MeasurementType, 
+    days: number = 7
+  ): Promise<MeasurementWithDetails[]> {
+    const measurements = await this.getMeasurementsByUser(userId, type);
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() - days); // End date is days ago
+    
+    const startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - days); // Start date is 2*days ago
+    
+    const previousMeasurements = measurements.filter(
+      m => m.timestamp >= startDate && m.timestamp < endDate
+    );
+    
+    return Promise.all(
+      previousMeasurements.map(m => this.enrichMeasurementWithDetails(m))
     );
   }
 

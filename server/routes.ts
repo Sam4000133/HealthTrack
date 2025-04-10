@@ -123,6 +123,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Errore durante il recupero delle statistiche" });
     }
   });
+  
+  app.get("/api/measurements/stats/previous/:type/:days", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.query.userId ? parseInt(req.query.userId as string) : req.user!.id;
+      const type = req.params.type as MeasurementType;
+      const days = parseInt(req.params.days);
+      
+      // Check permissions - users can only access their own data
+      if (req.user!.role === 'user' && req.user!.id !== userId) {
+        return res.status(403).json({ message: "Non autorizzato ad accedere ai dati di altri utenti" });
+      }
+      
+      const measurements = await storage.getPreviousPeriodMeasurementsByType(userId, type, days);
+      res.json(measurements);
+    } catch (error) {
+      res.status(500).json({ message: "Errore durante il recupero delle statistiche del periodo precedente" });
+    }
+  });
 
   // Glucose measurement routes
   app.post("/api/measurements/glucose", isAuthenticated, async (req, res) => {

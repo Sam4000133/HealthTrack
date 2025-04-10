@@ -29,15 +29,30 @@ export default function Dashboard() {
   const { data: glucoseData, isLoading: isGlucoseLoading } = useQuery<MeasurementWithDetails[]>({
     queryKey: ["/api/measurements/stats/glucose/7"],
   });
+  
+  // Fetch previous period glucose data for comparison
+  const { data: previousGlucoseData, isLoading: isPrevGlucoseLoading } = useQuery<MeasurementWithDetails[]>({
+    queryKey: ["/api/measurements/stats/previous/glucose/7"],
+  });
 
   // Fetch recent blood pressure data for chart
   const { data: bpData, isLoading: isBPLoading } = useQuery<MeasurementWithDetails[]>({
     queryKey: ["/api/measurements/stats/blood_pressure/7"],
   });
   
+  // Fetch previous period blood pressure data for comparison
+  const { data: previousBpData, isLoading: isPrevBpLoading } = useQuery<MeasurementWithDetails[]>({
+    queryKey: ["/api/measurements/stats/previous/blood_pressure/7"],
+  });
+  
   // Fetch recent weight data for chart
   const { data: weightData, isLoading: isWeightLoading } = useQuery<MeasurementWithDetails[]>({
     queryKey: ["/api/measurements/stats/weight/7"],
+  });
+  
+  // Fetch previous period weight data for comparison
+  const { data: previousWeightData, isLoading: isPrevWeightLoading } = useQuery<MeasurementWithDetails[]>({
+    queryKey: ["/api/measurements/stats/previous/weight/7"],
   });
 
   // Fetch recent measurements for table

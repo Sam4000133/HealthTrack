@@ -38,6 +38,9 @@ interface VitalChartProps {
   getValue: (measurement: MeasurementWithDetails) => number | { systolic: number; diastolic: number; heartRate: number };
   upperLimit?: number;
   lowerLimit?: number;
+  // Optional previous period data for comparison
+  previousData?: MeasurementWithDetails[];
+  isPreviousLoading?: boolean;
 }
 
 export default function VitalChart({
@@ -49,6 +52,8 @@ export default function VitalChart({
   getValue,
   upperLimit,
   lowerLimit,
+  previousData,
+  isPreviousLoading,
 }: VitalChartProps) {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);

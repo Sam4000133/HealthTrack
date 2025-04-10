@@ -324,6 +324,33 @@ export class DatabaseStorage implements IStorage {
       recentMeasurements.map(m => this.enrichMeasurementWithDetails(m))
     );
   }
+  
+  async getPreviousPeriodMeasurementsByType(
+    userId: number, 
+    type: MeasurementType, 
+    days: number = 7
+  ): Promise<MeasurementWithDetails[]> {
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() - days); // End date is days ago (the start of current period)
+    
+    const startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - days); // Start date is 2*days ago
+    
+    const previousMeasurements = await db
+      .select()
+      .from(measurements)
+      .where(and(
+        eq(measurements.userId, userId),
+        eq(measurements.type, type),
+        sql`${measurements.timestamp} >= ${startDate}`,
+        sql`${measurements.timestamp} < ${endDate}`
+      ))
+      .orderBy(desc(measurements.timestamp));
+    
+    return Promise.all(
+      previousMeasurements.map(m => this.enrichMeasurementWithDetails(m))
+    );
+  }
 
   async getLatestMeasurementsByType(
     userId: number
