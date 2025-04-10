@@ -241,6 +241,8 @@ export default function Dashboard() {
                     getValue={getGlucoseValue}
                     upperLimit={GLUCOSE_THRESHOLDS.HIGH}
                     lowerLimit={GLUCOSE_THRESHOLDS.LOW}
+                    previousData={previousGlucoseData || []}
+                    isPreviousLoading={isPrevGlucoseLoading}
                   />
                 </CardContent>
               </Card>
@@ -255,6 +257,8 @@ export default function Dashboard() {
                     isLoading={isBPLoading}
                     type="blood_pressure"
                     getValue={getBloodPressureValue}
+                    previousData={previousBpData || []}
+                    isPreviousLoading={isPrevBpLoading}
                   />
                 </CardContent>
               </Card>
@@ -269,6 +273,8 @@ export default function Dashboard() {
                     isLoading={isWeightLoading}
                     type="weight"
                     getValue={getWeightValue}
+                    previousData={previousWeightData || []}
+                    isPreviousLoading={isPrevWeightLoading}
                   />
                 </CardContent>
               </Card>
