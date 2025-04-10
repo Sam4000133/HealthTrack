@@ -11,7 +11,10 @@ interface MobileNavProps {
 }
 
 export default function MobileNav({ currentPage, role, isOpen, toggleSidebar }: MobileNavProps) {
-  const [isSystemOpen, setIsSystemOpen] = useState(false);
+  // Mantiene il menu Sistema aperto se siamo in una delle pagine del menu
+  const [isSystemOpen, setIsSystemOpen] = useState(
+    ['settings', 'roles', 'integrations', 'security', 'privacy', 'backup'].includes(currentPage)
+  );
   const { logoutMutation } = useAuth();
 
   if (!isOpen) {

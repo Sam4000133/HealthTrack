@@ -9,7 +9,10 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ currentPage, role }: SidebarProps) {
-  const [isSystemOpen, setIsSystemOpen] = useState(false);
+  // Mantiene il menu Sistema aperto se siamo in una delle pagine del menu
+  const [isSystemOpen, setIsSystemOpen] = useState(
+    ['settings', 'roles', 'integrations', 'security', 'privacy', 'backup'].includes(currentPage)
+  );
   const { logoutMutation } = useAuth();
   const { user } = useAuth();
 

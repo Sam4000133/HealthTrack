@@ -364,7 +364,7 @@ export default function Settings() {
                     <TableCell>
                       <Badge variant={
                         log.level === "ERROR" ? "destructive" : 
-                        log.level === "WARNING" ? "warning" : 
+                        log.level === "WARNING" ? "outline" : 
                         "secondary"
                       }>
                         {log.level}
