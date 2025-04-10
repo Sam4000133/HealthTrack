@@ -246,11 +246,6 @@ export default function VitalChart({
         </div>
       </div>
       <div className="flex-1 flex flex-col">
-        <div className="flex justify-end px-5">
-          <div className="text-sm text-gray-500 dark:text-gray-400 mb-2 bg-gray-50 dark:bg-gray-700 px-3 py-1 rounded-md">
-            <span className="font-medium">Media:</span> {isLoading ? <Skeleton className="h-4 w-16 inline-block" /> : calculateAverage()}
-          </div>
-        </div>
         <div className="flex-1 px-5">
           {isLoading ? (
             <div className="w-full h-full flex items-center justify-center">
@@ -263,6 +258,11 @@ export default function VitalChart({
               Nessun dato disponibile
             </div>
           )}
+        </div>
+        <div className="bg-gray-50 dark:bg-gray-700 px-5 py-2 mt-2">
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="font-medium">Media:</span> {isLoading ? <Skeleton className="h-4 w-16 inline-block" /> : calculateAverage()}
+          </div>
         </div>
       </div>
     </div>
