@@ -6,34 +6,30 @@ export default function ThemeToggle() {
 
   useEffect(() => {
     // Get the initial theme from localStorage or system preference
-    const storedTheme = localStorage.getItem('darkMode');
+    const storedTheme = localStorage.getItem('theme');
     if (storedTheme !== null) {
-      setIsDarkMode(storedTheme === 'true');
+      setIsDarkMode(storedTheme === 'dark');
     } else {
       // Check system preference
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       setIsDarkMode(prefersDark);
-      localStorage.setItem('darkMode', String(prefersDark));
+      localStorage.setItem('theme', prefersDark ? 'dark' : 'light');
     }
 
-    // Apply theme to document
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
+    // Apply theme immediately to document
+    document.documentElement.className = isDarkMode ? 'dark' : 'light';
+  }, []);
 
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
-    localStorage.setItem('darkMode', String(newMode));
     
-    if (newMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    // Set the theme in localStorage
+    const newTheme = newMode ? 'dark' : 'light';
+    localStorage.setItem('theme', newTheme);
+    
+    // Apply the theme to the document
+    document.documentElement.className = newTheme;
   };
 
   return (
