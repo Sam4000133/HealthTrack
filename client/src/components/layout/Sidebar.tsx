@@ -109,6 +109,30 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
               </Link>
             )}
             
+            {/* Admin user management section */}
+            {role === 'admin' && (
+              <Link href="/users">
+                <a 
+                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                    currentPage === 'users' 
+                      ? 'bg-primary/10 text-primary dark:text-white dark:bg-blue-600/70 font-bold border-l-4 border-blue-500' 
+                      : 'text-gray-700 dark:text-gray-200'
+                  }`}
+                >
+                  <svg 
+                    className={`mr-3 h-6 w-6 ${currentPage === 'users' ? 'text-primary dark:text-white' : 'text-gray-400 dark:text-gray-400'}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24" 
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                  </svg>
+                  Gestione Utenti
+                </a>
+              </Link>
+            )}
+            
             {/* System dropdown */}
             <div>
               <button 
@@ -203,30 +227,6 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
                 </div>
               )}
             </div>
-            
-            {/* Admin user management section */}
-            {role === 'admin' && (
-              <Link href="/users">
-                <a 
-                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                    currentPage === 'users' 
-                      ? 'bg-primary/10 text-primary dark:text-white dark:bg-blue-600/70 font-bold border-l-4 border-blue-500' 
-                      : 'text-gray-700 dark:text-gray-200'
-                  }`}
-                >
-                  <svg 
-                    className={`mr-3 h-6 w-6 ${currentPage === 'users' ? 'text-primary dark:text-white' : 'text-gray-400 dark:text-gray-400'}`} 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24" 
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                  </svg>
-                  Gestione Utenti
-                </a>
-              </Link>
-            )}
             </div>
 
             {/* Footer with profile and logout */}
