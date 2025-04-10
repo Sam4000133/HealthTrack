@@ -54,7 +54,7 @@ export default function Header({ user, isSidebarOpen, toggleSidebar }: HeaderPro
             </button>
             <div className="flex-shrink-0 flex items-center ml-2 lg:ml-0">
               <Link href="/">
-                <a className="text-primary font-bold text-xl">HealthTrack</a>
+                <a className="text-primary font-bold text-xl dark:text-white">HealthTrack</a>
               </Link>
             </div>
           </div>
