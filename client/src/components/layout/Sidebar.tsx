@@ -24,7 +24,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
               <a 
                 className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
                   currentPage === 'dashboard' 
-                    ? 'bg-primary/10 text-primary dark:text-white dark:bg-primary-600/60' 
+                    ? 'bg-primary/10 text-primary dark:text-white dark:bg-blue-600/70 font-bold border-l-4 border-blue-500' 
                     : 'text-gray-700 dark:text-gray-200'
                 }`}
               >
@@ -46,7 +46,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
               <a 
                 className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
                   currentPage === 'measurements' 
-                    ? 'bg-primary/10 text-primary dark:text-white dark:bg-primary-600/60' 
+                    ? 'bg-primary/10 text-primary dark:text-white dark:bg-blue-600/70 font-bold border-l-4 border-blue-500' 
                     : 'text-gray-700 dark:text-gray-200'
                 }`}
               >
@@ -68,7 +68,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
               <a 
                 className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
                   currentPage === 'statistics' 
-                    ? 'bg-primary/10 text-primary dark:text-white dark:bg-primary-600/60' 
+                    ? 'bg-primary/10 text-primary dark:text-white dark:bg-blue-600/70 font-bold border-l-4 border-blue-500' 
                     : 'text-gray-700 dark:text-gray-200'
                 }`}
               >
@@ -91,7 +91,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
                 <a 
                   className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
                     currentPage === 'patients' 
-                      ? 'bg-primary/10 text-primary dark:text-white dark:bg-primary-600/60' 
+                      ? 'bg-primary/10 text-primary dark:text-white dark:bg-blue-600/70 font-bold border-l-4 border-blue-500' 
                       : 'text-gray-700 dark:text-gray-200'
                   }`}
                 >
@@ -117,7 +117,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
                   currentPage === 'settings' || currentPage === 'roles' || 
                   currentPage === 'integrations' || currentPage === 'security' || 
                   currentPage === 'privacy' || currentPage === 'backup'
-                    ? 'bg-primary/10 text-primary dark:text-white dark:bg-primary-600/60' 
+                    ? 'bg-primary/10 text-primary dark:text-white dark:bg-blue-600/70 font-bold border-l-4 border-blue-500' 
                     : 'text-gray-700 dark:text-gray-200'
                 }`}
               >
@@ -147,7 +147,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
                   <Link href="/settings">
                     <a className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
                       currentPage === 'settings' 
-                        ? 'bg-primary/10 text-primary dark:text-white dark:bg-primary-600/60' 
+                        ? 'bg-primary/10 text-primary dark:text-white dark:bg-blue-600/70 font-bold border-l-4 border-blue-500' 
                         : 'text-gray-700 dark:text-gray-200'
                     }`}>
                       Impostazioni
@@ -157,7 +157,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
                     <Link href="/roles">
                       <a className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
                         currentPage === 'roles' 
-                          ? 'bg-primary/10 text-primary dark:text-white dark:bg-primary-600/60' 
+                          ? 'bg-primary/10 text-primary dark:text-white dark:bg-blue-600/70 font-bold border-l-4 border-blue-500' 
                           : 'text-gray-700 dark:text-gray-200'
                       }`}>
                         Ruoli
@@ -167,7 +167,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
                   <Link href="/integrations">
                     <a className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
                       currentPage === 'integrations' 
-                        ? 'bg-primary/10 text-primary dark:text-white dark:bg-primary-600/60' 
+                        ? 'bg-primary/10 text-primary dark:text-white dark:bg-blue-600/70 font-bold border-l-4 border-blue-500' 
                         : 'text-gray-700 dark:text-gray-200'
                     }`}>
                       Integrazioni
@@ -176,7 +176,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
                   <Link href="/security">
                     <a className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
                       currentPage === 'security' 
-                        ? 'bg-primary/10 text-primary dark:text-white dark:bg-primary-600/60' 
+                        ? 'bg-primary/10 text-primary dark:text-white dark:bg-blue-600/70 font-bold border-l-4 border-blue-500' 
                         : 'text-gray-700 dark:text-gray-200'
                     }`}>
                       Sicurezza
@@ -185,7 +185,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
                   <Link href="/privacy">
                     <a className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
                       currentPage === 'privacy' 
-                        ? 'bg-primary/10 text-primary dark:text-white dark:bg-primary-600/60' 
+                        ? 'bg-primary/10 text-primary dark:text-white dark:bg-blue-600/70 font-bold border-l-4 border-blue-500' 
                         : 'text-gray-700 dark:text-gray-200'
                     }`}>
                       Privacy
@@ -194,7 +194,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
                   <Link href="/backup">
                     <a className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
                       currentPage === 'backup' 
-                        ? 'bg-primary/10 text-primary dark:text-white dark:bg-primary-600/60' 
+                        ? 'bg-primary/10 text-primary dark:text-white dark:bg-blue-600/70 font-bold border-l-4 border-blue-500' 
                         : 'text-gray-700 dark:text-gray-200'
                     }`}>
                       Backup
@@ -210,7 +210,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
                 <a 
                   className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
                     currentPage === 'users' 
-                      ? 'bg-primary/10 text-primary dark:text-white dark:bg-primary-600/60' 
+                      ? 'bg-primary/10 text-primary dark:text-white dark:bg-blue-600/70 font-bold border-l-4 border-blue-500' 
                       : 'text-gray-700 dark:text-gray-200'
                   }`}
                 >
@@ -235,7 +235,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
               <Link href="/profile">
                 <a className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
                   currentPage === 'profile' 
-                    ? 'bg-primary/10 text-primary dark:text-white dark:bg-primary-600/60' 
+                    ? 'bg-primary/10 text-primary dark:text-white dark:bg-blue-600/70 font-bold border-l-4 border-blue-500' 
                     : 'text-gray-700 dark:text-gray-200'
                 }`}>
                   <svg 
