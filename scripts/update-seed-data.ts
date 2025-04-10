@@ -119,11 +119,12 @@ async function main() {
   const trends = ["improving", "worsening", "stable", "fluctuating", "improving", "worsening", "fluctuating"];
   
   // Create measurement data for current date and 30 days back
-  const today = new Date();
+  // Hardcode April 10, 2025 as "today" as requested
+  const today = new Date(2025, 3, 10); // April 10, 2025 (month is 0-indexed)
   const start = startOfDay(today);
   const allPatients = [...patientUsers, adminUser];
   
-  console.log(`Generating 30 days of data for ${allPatients.length} patients...`);
+  console.log(`Generating 30 days of data for ${allPatients.length} patients starting from ${format(today, 'dd/MM/yyyy')}...`);
   
   // Create bulk data generation to make it faster
   const measurementsToInsert = [];
@@ -131,8 +132,8 @@ async function main() {
   const bpMeasurementsToInsert = [];
   const weightMeasurementsToInsert = [];
   
-  // Generate every 3 days to reduce amount of data but cover 30 days
-  for (let day = -29; day <= 0; day += 3) {
+  // Generate every day to ensure we have continuous data
+  for (let day = -29; day <= 0; day++) {
     const currentDate = addDays(start, day);
     
     for (let p = 0; p < allPatients.length; p++) {
@@ -253,24 +254,88 @@ async function main() {
     const chunk = measurementsToInsert.slice(i, i + chunkSize);
     const insertedMeasurements = await db.insert(measurements).values(chunk).returning();
     
-    // Create the detailed measurements
+    // Create the detailed measurements with realistic values based on patient profile and date
+    const measurementDetailMap = new Map();
+    
+    // Prepare patient data map for quick lookup
+    const patientDataMap = new Map();
+    allPatients.forEach((patient, index) => {
+      patientDataMap.set(patient.id, {
+        baseValues: patientData[index % patientData.length].values,
+        trend: trends[index % trends.length]
+      });
+    });
+    
+    // First, prepare glucose measurement details
     for (const measurement of insertedMeasurements) {
+      const measurementDate = measurement.timestamp;
+      const day = Math.floor((measurementDate.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
+      const patientInfo = patientDataMap.get(measurement.userId);
+      
+      if (!patientInfo) continue;
+      
+      const baseValues = patientInfo.baseValues;
+      const trend = patientInfo.trend;
+      
+      // Calculate trend effect
+      const trendFactor = day / -29; // 0 to 1 (0 = today, 1 = oldest)
+      
+      let trendMultiplier = 1;
+      switch (trend) {
+        case "improving":
+          trendMultiplier = 1 + (0.1 * trendFactor);
+          break;
+        case "worsening":
+          trendMultiplier = 1 + (0.15 * (1 - trendFactor));
+          break;
+        case "fluctuating":
+          trendMultiplier = 1 + (Math.sin(day * 0.5) * 0.08);
+          break;
+        case "stable":
+        default:
+          trendMultiplier = 1 + (Math.random() * 0.04 - 0.02);
+          break;
+      }
+      
+      // Time of day effect
+      const hourEffect = 1 + ((measurementDate.getHours() - 12) * 0.005);
+      
       if (measurement.type === "glucose") {
+        const glucoseValue = Math.round(baseValues.glucose * trendMultiplier * hourEffect);
+        const glucoseRandomVariation = Math.round(glucoseValue * (Math.random() * 0.1 - 0.05));
+        const finalGlucoseValue = glucoseValue + glucoseRandomVariation;
+        
         await db.insert(glucoseMeasurements).values({
           measurementId: measurement.id,
-          value: Math.round(100 + Math.random() * 100) // Random glucose between 100-200
+          value: finalGlucoseValue // Realistic glucose value based on patient profile
         });
       } else if (measurement.type === "blood_pressure") {
+        const systolicValue = Math.round(baseValues.systolic * trendMultiplier);
+        const diastolicValue = Math.round(baseValues.diastolic * trendMultiplier);
+        
+        // Add some random variation
+        const systolicVariation = Math.round(systolicValue * (Math.random() * 0.06 - 0.03));
+        const diastolicVariation = Math.round(diastolicValue * (Math.random() * 0.06 - 0.03));
+        const finalSystolic = systolicValue + systolicVariation;
+        const finalDiastolic = diastolicValue + diastolicVariation;
+        
+        // Heart rate varies more
+        const heartRate = Math.round(72 + (Math.random() * 20 - 10));
+        
         await db.insert(bloodPressureMeasurements).values({
           measurementId: measurement.id,
-          systolic: Math.round(110 + Math.random() * 50), // Random systolic between 110-160
-          diastolic: Math.round(70 + Math.random() * 30), // Random diastolic between 70-100
-          heartRate: Math.round(60 + Math.random() * 40) // Random HR between 60-100
+          systolic: finalSystolic,
+          diastolic: finalDiastolic,
+          heartRate: heartRate
         });
       } else if (measurement.type === "weight") {
+        const weightValue = Math.round(baseValues.weight * trendMultiplier);
+        const weightVariation = Math.round(weightValue * (Math.random() * 0.01 - 0.005));
+        const finalWeightValue = weightValue + weightVariation;
+        
         await db.insert(weightMeasurements).values({
           measurementId: measurement.id,
-          value: Math.round(60000 + Math.random() * 40000) // Random weight between 60-100kg (in grams)
+          value: finalWeightValue // Weight in grams
         });
       }
     }
