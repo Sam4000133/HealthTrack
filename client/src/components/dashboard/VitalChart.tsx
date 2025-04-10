@@ -72,23 +72,23 @@ export default function VitalChart({
   useEffect(() => {
     if (isLoading || !chartRef.current) return;
 
-    // Prepare the last 7 days (ensure we always show 7 days even if some days have no data)
-    const today = new Date();
+    // Imposta data al 10 aprile 2025 (per far coincidere con i dati generati)
+    const refDate = new Date(2025, 3, 10); // 10 aprile 2025
     const last7Days = Array.from({ length: 7 }, (_, i) => {
-      const date = new Date(today);
-      date.setDate(today.getDate() - (6 - i)); // 6 days ago to today (7 days total)
+      const date = new Date(refDate);
+      date.setDate(refDate.getDate() - (6 - i)); // 6 giorni fa fino a oggi (7 giorni totali)
       return {
         date,
         dateString: format(date, "dd/MM")
       };
     });
 
-    // Sort data by timestamp
+    // Ordina i dati per timestamp
     const sortedData = [...data].sort((a, b) => {
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
 
-    // Create labels for all 7 days
+    // Crea etichette per tutti i 7 giorni
     const labels = last7Days.map(day => day.dateString);
 
     // Create datasets based on measurement type
