@@ -259,14 +259,9 @@ export default function VitalChart({
             </div>
           )}
         </div>
-        <div className="bg-gray-50 dark:bg-gray-700 px-5 py-3 flex justify-between items-center">
+        <div className="bg-gray-50 dark:bg-gray-700 px-5 py-3">
           <div className="text-sm text-gray-500 dark:text-gray-400">
             <span className="font-medium">Media:</span> {isLoading ? <Skeleton className="h-4 w-16 inline-block" /> : calculateAverage()}
-          </div>
-          <div>
-            <button className="text-sm font-medium text-primary hover:text-primary-dark">
-              Visualizza dettagli
-            </button>
           </div>
         </div>
       </CardContent>
