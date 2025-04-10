@@ -79,13 +79,13 @@ export default function StatsCard({
               <Skeleton className="h-4 w-48" />
             ) : measurement ? (
               <Link to="/measurements">
-                <a className="font-medium text-primary hover:text-primary-dark">
-                  Ultima misurazione: {formattedDate}
+                <a className="font-medium text-primary hover:text-primary-dark dark:text-white dark:hover:text-blue-300">
+                  <span className="dark:text-gray-300">Ultima misurazione:</span> {formattedDate}
                 </a>
               </Link>
             ) : (
               <Link to="/measurements">
-                <a className="font-medium text-primary hover:text-primary-dark">
+                <a className="font-medium text-primary hover:text-primary-dark dark:text-white dark:hover:text-blue-300">
                   Aggiungi prima misurazione
                 </a>
               </Link>
