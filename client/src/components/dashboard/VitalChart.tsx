@@ -238,15 +238,15 @@ export default function VitalChart({
   };
 
   return (
-    <Card className="shadow">
-      <CardHeader className="p-5">
-        <CardTitle className="text-lg leading-6 font-medium">{title}</CardTitle>
+    <div>
+      <div className="p-4">
+        <h3 className="text-lg leading-6 font-medium">{title}</h3>
         <div className="mt-2">
           <p className="text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>
         </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="mt-4 h-72 px-5">
+      </div>
+      <div>
+        <div className="h-72 px-5">
           {isLoading ? (
             <div className="w-full h-full flex items-center justify-center">
               <Skeleton className="h-4/5 w-11/12" />
@@ -259,12 +259,12 @@ export default function VitalChart({
             </div>
           )}
         </div>
-        <div className="bg-gray-50 dark:bg-gray-700 px-5 py-3">
+        <div className="bg-gray-50 dark:bg-gray-700 px-5 py-3 mt-4 rounded-b-md">
           <div className="text-sm text-gray-500 dark:text-gray-400">
             <span className="font-medium">Media:</span> {isLoading ? <Skeleton className="h-4 w-16 inline-block" /> : calculateAverage()}
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
