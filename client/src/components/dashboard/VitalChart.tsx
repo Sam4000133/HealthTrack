@@ -234,13 +234,15 @@ export default function VitalChart({
       const avg = values.reduce((sum, val) => sum + val, 0) / values.length;
       return `${Math.round(avg)} mg/dL`;
     } else if (type === "blood_pressure") {
-      const systolicValues = data.map(item => (getValue(item) as { systolic: number; diastolic: number }).systolic);
-      const diastolicValues = data.map(item => (getValue(item) as { systolic: number; diastolic: number }).diastolic);
+      const systolicValues = data.map(item => (getValue(item) as { systolic: number; diastolic: number; heartRate: number }).systolic);
+      const diastolicValues = data.map(item => (getValue(item) as { systolic: number; diastolic: number; heartRate: number }).diastolic);
+      const heartRateValues = data.map(item => (getValue(item) as { systolic: number; diastolic: number; heartRate: number }).heartRate);
       
       const avgSystolic = systolicValues.reduce((sum, val) => sum + val, 0) / systolicValues.length;
       const avgDiastolic = diastolicValues.reduce((sum, val) => sum + val, 0) / diastolicValues.length;
+      const avgHeartRate = heartRateValues.reduce((sum, val) => sum + val, 0) / heartRateValues.length;
       
-      return `${Math.round(avgSystolic)}/${Math.round(avgDiastolic)} mmHg`;
+      return `${Math.round(avgSystolic)}/${Math.round(avgDiastolic)} mmHg, ${Math.round(avgHeartRate)} BPM`;
     } else if (type === "weight") {
       const values = data.map(item => getValue(item) as number);
       const avg = values.reduce((sum, val) => sum + val, 0) / values.length / 1000; // Convert from grams to kg
