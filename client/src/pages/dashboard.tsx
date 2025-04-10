@@ -33,6 +33,11 @@ export default function Dashboard() {
   const { data: bpData, isLoading: isBPLoading } = useQuery<MeasurementWithDetails[]>({
     queryKey: ["/api/measurements/stats/blood_pressure/7"],
   });
+  
+  // Fetch recent weight data for chart
+  const { data: weightData, isLoading: isWeightLoading } = useQuery<MeasurementWithDetails[]>({
+    queryKey: ["/api/measurements/stats/weight/7"],
+  });
 
   // Fetch recent measurements for table
   const { data: recentMeasurements, isLoading: isMeasurementsLoading } = useQuery<MeasurementWithDetails[]>({
@@ -133,10 +138,11 @@ export default function Dashboard() {
     return measurement.glucose?.value || 0;
   };
 
-  const getBloodPressureValue = (measurement: MeasurementWithDetails): { systolic: number; diastolic: number } => {
+  const getBloodPressureValue = (measurement: MeasurementWithDetails): { systolic: number; diastolic: number; heartRate: number } => {
     return {
       systolic: measurement.bloodPressure?.systolic || 0,
-      diastolic: measurement.bloodPressure?.diastolic || 0
+      diastolic: measurement.bloodPressure?.diastolic || 0,
+      heartRate: measurement.bloodPressure?.heartRate || 0
     };
   };
 

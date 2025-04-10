@@ -35,7 +35,7 @@ interface VitalChartProps {
   data: MeasurementWithDetails[];
   isLoading: boolean;
   type: "glucose" | "blood_pressure" | "weight";
-  getValue: (measurement: MeasurementWithDetails) => number | { systolic: number; diastolic: number };
+  getValue: (measurement: MeasurementWithDetails) => number | { systolic: number; diastolic: number; heartRate: number };
   upperLimit?: number;
   lowerLimit?: number;
 }
@@ -122,13 +122,18 @@ export default function VitalChart({
       }
     } else if (type === "blood_pressure") {
       const systolicValues = sortedData.map(item => {
-        const value = getValue(item) as { systolic: number; diastolic: number };
+        const value = getValue(item) as { systolic: number; diastolic: number; heartRate: number };
         return value.systolic;
       });
 
       const diastolicValues = sortedData.map(item => {
-        const value = getValue(item) as { systolic: number; diastolic: number };
+        const value = getValue(item) as { systolic: number; diastolic: number; heartRate: number };
         return value.diastolic;
+      });
+      
+      const heartRateValues = sortedData.map(item => {
+        const value = getValue(item) as { systolic: number; diastolic: number; heartRate: number };
+        return value.heartRate;
       });
 
       datasets = [
@@ -146,6 +151,14 @@ export default function VitalChart({
           borderColor: "#10b981",
           backgroundColor: "rgba(16, 185, 129, 0.1)",
           pointBackgroundColor: "#10b981",
+          tension: 0.2
+        },
+        {
+          label: "Battito (BPM)",
+          data: heartRateValues,
+          borderColor: "#f97316",
+          backgroundColor: "rgba(249, 115, 22, 0.1)",
+          pointBackgroundColor: "#f97316",
           tension: 0.2
         }
       ];
