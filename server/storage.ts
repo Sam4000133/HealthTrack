@@ -470,6 +470,33 @@ export class MemStorage implements IStorage {
     
     return result;
   }
+  
+  // 2FA operations
+  async saveTwoFactorBackupCodes(userId: number, codes: string[]): Promise<void> {
+    // In memory implementation - would be implemented with a real DB in DatabaseStorage
+    const user = await this.getUser(userId);
+    if (!user) return;
+    
+    // We're just adding a dummy implementation here since MemStorage is not actually used
+    console.log(`Saved ${codes.length} backup codes for user ${userId}`);
+  }
+
+  async getTwoFactorBackupCodes(userId: number): Promise<string[]> {
+    // In memory implementation - would be implemented with a real DB in DatabaseStorage
+    // Return empty array for memory storage
+    return [];
+  }
+
+  async validateTwoFactorBackupCode(userId: number, code: string): Promise<boolean> {
+    // In memory implementation - would be implemented with a real DB in DatabaseStorage
+    // Always return false for memory storage
+    return false;
+  }
+
+  async removeTwoFactorBackupCodes(userId: number): Promise<void> {
+    // In memory implementation - would be implemented with a real DB in DatabaseStorage
+    console.log(`Removed backup codes for user ${userId}`);
+  }
 }
 
 import { DatabaseStorage } from "./database-storage";

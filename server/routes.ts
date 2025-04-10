@@ -15,6 +15,9 @@ import { ZodError } from "zod";
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes and middleware
   const { isAdmin, isDoctor, isAuthenticated } = setupAuth(app);
+  
+  // Set up security routes
+  setupSecurityRoutes(app);
 
   // User routes
   app.get("/api/users", isAdmin, async (req, res) => {
