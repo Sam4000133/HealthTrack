@@ -10,7 +10,8 @@ import {
   Title, 
   Tooltip, 
   Legend, 
-  Filler 
+  Filler,
+  LineController
 } from "chart.js";
 import { MeasurementWithDetails } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,6 +22,7 @@ Chart.register(
   LinearScale,
   PointElement,
   LineElement,
+  LineController,
   Title,
   Tooltip,
   Legend,
