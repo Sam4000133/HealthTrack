@@ -38,7 +38,12 @@ export default function StatsCard({
       <CardContent className="p-0">
         <div className="p-5">
           <div className="flex items-center">
-            <div className={`flex-shrink-0 rounded-md p-3 bg-primary-500/20 text-primary-600 dark:bg-primary-900/30 dark:text-primary-300`}>
+            <div className={`flex-shrink-0 rounded-md p-3 ${
+                color === 'red' ? 'bg-red-500 text-white dark:bg-red-600' :
+                color === 'green' ? 'bg-green-500 text-white dark:bg-green-600' :
+                color === 'indigo' ? 'bg-indigo-500 text-white dark:bg-indigo-600' :
+                'bg-primary-500 text-white dark:bg-primary-600'
+              }`}>
               {icon}
             </div>
             <div className="ml-5 w-0 flex-1">
