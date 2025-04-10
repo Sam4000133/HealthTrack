@@ -300,6 +300,94 @@ export class DatabaseStorage implements IStorage {
       weight: weightMeasurement,
     };
   }
+  
+  async updateGlucoseMeasurement(measurementId: number, data: { value: number, notes?: string | null }): Promise<MeasurementWithDetails> {
+    // Update base measurement notes if provided
+    if (data.notes !== undefined) {
+      await db.update(measurements)
+        .set({ notes: data.notes })
+        .where(eq(measurements.id, measurementId));
+    }
+    
+    // Update glucose-specific measurement
+    await db.update(glucoseMeasurements)
+      .set({ value: data.value })
+      .where(eq(glucoseMeasurements.measurementId, measurementId));
+    
+    return this.getMeasurementWithDetails(measurementId);
+  }
+  
+  async updateBloodPressureMeasurement(measurementId: number, data: { systolic?: number, diastolic?: number, heartRate?: number | null, notes?: string | null }): Promise<MeasurementWithDetails> {
+    // Update base measurement notes if provided
+    if (data.notes !== undefined) {
+      await db.update(measurements)
+        .set({ notes: data.notes })
+        .where(eq(measurements.id, measurementId));
+    }
+    
+    // Build update object with only provided fields
+    const updateData: Partial<{ systolic: number, diastolic: number, heartRate: number | null }> = {};
+    if (data.systolic !== undefined) updateData.systolic = data.systolic;
+    if (data.diastolic !== undefined) updateData.diastolic = data.diastolic;
+    if (data.heartRate !== undefined) updateData.heartRate = data.heartRate;
+    
+    // Only update if there's something to update
+    if (Object.keys(updateData).length > 0) {
+      await db.update(bloodPressureMeasurements)
+        .set(updateData)
+        .where(eq(bloodPressureMeasurements.measurementId, measurementId));
+    }
+    
+    return this.getMeasurementWithDetails(measurementId);
+  }
+  
+  async updateWeightMeasurement(measurementId: number, data: { value: number, notes?: string | null }): Promise<MeasurementWithDetails> {
+    // Update base measurement notes if provided
+    if (data.notes !== undefined) {
+      await db.update(measurements)
+        .set({ notes: data.notes })
+        .where(eq(measurements.id, measurementId));
+    }
+    
+    // Update weight-specific measurement
+    await db.update(weightMeasurements)
+      .set({ value: data.value })
+      .where(eq(weightMeasurements.measurementId, measurementId));
+    
+    return this.getMeasurementWithDetails(measurementId);
+  }
+  
+  async deleteMeasurement(id: number): Promise<boolean> {
+    const measurement = await this.getMeasurement(id);
+    if (!measurement) {
+      return false;
+    }
+    
+    // Delete type-specific measurement data first (due to foreign key constraints)
+    switch (measurement.type) {
+      case 'glucose':
+        await db.delete(glucoseMeasurements)
+          .where(eq(glucoseMeasurements.measurementId, id));
+        break;
+        
+      case 'blood_pressure':
+        await db.delete(bloodPressureMeasurements)
+          .where(eq(bloodPressureMeasurements.measurementId, id));
+        break;
+        
+      case 'weight':
+        await db.delete(weightMeasurements)
+          .where(eq(weightMeasurements.measurementId, id));
+        break;
+    }
+    
+    // Delete base measurement
+    const result = await db.delete(measurements)
+      .where(eq(measurements.id, id))
+      .returning();
+    
+    return result.length > 0;
+  }
 
   // Statistics operations
   async getRecentMeasurementsByType(
