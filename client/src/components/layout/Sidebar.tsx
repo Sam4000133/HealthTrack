@@ -16,7 +16,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
   return (
     <div className="hidden lg:flex lg:flex-shrink-0">
       <div className="flex flex-col w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+        <div className="flex flex-col h-full pt-5 pb-4 overflow-y-auto">
           <nav className="mt-5 flex-1 px-2 space-y-1">
             {/* Dashboard */}
             <Link href="/">
@@ -226,7 +226,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
                 </a>
               </Link>
             )}
-            
+
             {/* Footer with profile and logout */}
             <div className="mt-auto pt-6 border-t border-gray-200 dark:border-gray-700">
               {/* Profile Link */}
@@ -245,9 +245,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                   </svg>
-                  <span className="truncate">
-                    {user?.name || "Profilo"}
-                  </span>
+                  <span>Profilo</span>
                 </a>
               </Link>
               

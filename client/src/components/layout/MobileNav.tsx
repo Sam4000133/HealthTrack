@@ -29,12 +29,12 @@ export default function MobileNav({ isSidebarOpen, toggleSidebar, currentPage, r
           </button>
         </div>
         
-        <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+        <div className="flex-1 flex flex-col h-0 pt-5 pb-4 overflow-y-auto">
           <div className="flex-shrink-0 flex items-center px-4">
             <span className="text-primary font-bold text-xl">HealthTrack</span>
           </div>
           
-          <nav className="mt-5 px-2 space-y-1">
+          <nav className="mt-5 px-2 space-y-1 flex-1 flex flex-col">
             {/* Dashboard */}
             <Link href="/">
               <a 
@@ -288,9 +288,7 @@ export default function MobileNav({ isSidebarOpen, toggleSidebar, currentPage, r
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                   </svg>
-                  <span className="truncate">
-                    {user?.name || "Profilo"}
-                  </span>
+                  <span>Profilo</span>
                 </a>
               </Link>
               
