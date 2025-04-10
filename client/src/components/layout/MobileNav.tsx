@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { Role } from "@shared/schema";
 import { useAuth } from "@/hooks/use-auth";
+import { useState } from "react";
 
 interface MobileNavProps {
   isSidebarOpen: boolean;
@@ -10,7 +11,8 @@ interface MobileNavProps {
 }
 
 export default function MobileNav({ isSidebarOpen, toggleSidebar, currentPage, role }: MobileNavProps) {
-  const { logoutMutation } = useAuth();
+  const { logoutMutation, user } = useAuth();
+  const [isSystemOpen, setIsSystemOpen] = useState(false);
 
   return (
     <div className={`${isSidebarOpen ? 'block' : 'hidden'} fixed inset-0 flex z-40 lg:hidden`}>
@@ -33,6 +35,7 @@ export default function MobileNav({ isSidebarOpen, toggleSidebar, currentPage, r
           </div>
           
           <nav className="mt-5 px-2 space-y-1">
+            {/* Dashboard */}
             <Link href="/">
               <a 
                 onClick={toggleSidebar}
@@ -55,6 +58,7 @@ export default function MobileNav({ isSidebarOpen, toggleSidebar, currentPage, r
               </a>
             </Link>
             
+            {/* Measurements */}
             <Link href="/measurements">
               <a 
                 onClick={toggleSidebar}
@@ -77,6 +81,7 @@ export default function MobileNav({ isSidebarOpen, toggleSidebar, currentPage, r
               </a>
             </Link>
             
+            {/* Statistics */}
             <Link href="/statistics">
               <a 
                 onClick={toggleSidebar}
@@ -99,6 +104,7 @@ export default function MobileNav({ isSidebarOpen, toggleSidebar, currentPage, r
               </a>
             </Link>
             
+            {/* Patients (only for doctor or admin) */}
             {(role === 'doctor' || role === 'admin') && (
               <Link href="/patients">
                 <a 
@@ -123,28 +129,120 @@ export default function MobileNav({ isSidebarOpen, toggleSidebar, currentPage, r
               </Link>
             )}
             
-            <Link href="/profile">
-              <a 
-                onClick={toggleSidebar}
-                className={`group flex items-center px-2 py-2 text-base font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                  currentPage === 'profile' 
+            {/* System dropdown */}
+            <div>
+              <button 
+                onClick={() => setIsSystemOpen(!isSystemOpen)}
+                className={`w-full group flex items-center px-2 py-2 text-base font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                  currentPage === 'settings' || currentPage === 'roles' || 
+                  currentPage === 'integrations' || currentPage === 'security' || 
+                  currentPage === 'privacy' || currentPage === 'backup'
                     ? 'bg-primary/10 text-primary dark:bg-primary/20' 
                     : 'text-gray-700 dark:text-gray-200'
                 }`}
               >
                 <svg 
-                  className={`mr-4 h-6 w-6 ${currentPage === 'profile' ? 'text-primary' : 'text-gray-400 dark:text-gray-400'}`}
+                  className={`mr-4 h-6 w-6 ${
+                    currentPage === 'settings' || currentPage === 'roles' || 
+                    currentPage === 'integrations' || currentPage === 'security' || 
+                    currentPage === 'privacy' || currentPage === 'backup'
+                      ? 'text-primary' 
+                      : 'text-gray-400 dark:text-gray-400'
+                  }`} 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24" 
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                 </svg>
-                Profilo
-              </a>
-            </Link>
+                Sistema
+                <svg className={`ml-auto h-5 w-5 transform transition-transform duration-200 ${isSystemOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              
+              {isSystemOpen && (
+                <div className="pl-8 space-y-1 mt-1">
+                  <Link href="/settings">
+                    <a 
+                      onClick={toggleSidebar}
+                      className={`group flex items-center px-2 py-2 text-base font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                        currentPage === 'settings' 
+                          ? 'bg-primary/10 text-primary dark:bg-primary/20' 
+                          : 'text-gray-700 dark:text-gray-200'
+                      }`}
+                    >
+                      Impostazioni
+                    </a>
+                  </Link>
+                  {role === 'admin' && (
+                    <Link href="/roles">
+                      <a 
+                        onClick={toggleSidebar}
+                        className={`group flex items-center px-2 py-2 text-base font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                          currentPage === 'roles' 
+                            ? 'bg-primary/10 text-primary dark:bg-primary/20' 
+                            : 'text-gray-700 dark:text-gray-200'
+                        }`}
+                      >
+                        Ruoli
+                      </a>
+                    </Link>
+                  )}
+                  <Link href="/integrations">
+                    <a 
+                      onClick={toggleSidebar}
+                      className={`group flex items-center px-2 py-2 text-base font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                        currentPage === 'integrations' 
+                          ? 'bg-primary/10 text-primary dark:bg-primary/20' 
+                          : 'text-gray-700 dark:text-gray-200'
+                      }`}
+                    >
+                      Integrazioni
+                    </a>
+                  </Link>
+                  <Link href="/security">
+                    <a 
+                      onClick={toggleSidebar}
+                      className={`group flex items-center px-2 py-2 text-base font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                        currentPage === 'security' 
+                          ? 'bg-primary/10 text-primary dark:bg-primary/20' 
+                          : 'text-gray-700 dark:text-gray-200'
+                      }`}
+                    >
+                      Sicurezza
+                    </a>
+                  </Link>
+                  <Link href="/privacy">
+                    <a 
+                      onClick={toggleSidebar}
+                      className={`group flex items-center px-2 py-2 text-base font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                        currentPage === 'privacy' 
+                          ? 'bg-primary/10 text-primary dark:bg-primary/20' 
+                          : 'text-gray-700 dark:text-gray-200'
+                      }`}
+                    >
+                      Privacy
+                    </a>
+                  </Link>
+                  <Link href="/backup">
+                    <a 
+                      onClick={toggleSidebar}
+                      className={`group flex items-center px-2 py-2 text-base font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                        currentPage === 'backup' 
+                          ? 'bg-primary/10 text-primary dark:bg-primary/20' 
+                          : 'text-gray-700 dark:text-gray-200'
+                      }`}
+                    >
+                      Backup
+                    </a>
+                  </Link>
+                </div>
+              )}
+            </div>
             
+            {/* Admin user management section */}
             {role === 'admin' && (
               <Link href="/users">
                 <a 
@@ -169,15 +267,44 @@ export default function MobileNav({ isSidebarOpen, toggleSidebar, currentPage, r
               </Link>
             )}
             
-            <button
-              onClick={() => logoutMutation.mutate()}
-              className="w-full mt-6 group flex items-center px-2 py-2 text-base font-medium rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
-            >
-              <svg className="mr-4 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-              </svg>
-              Logout
-            </button>
+            {/* Footer items (profile and logout) */}
+            <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+              {/* Profile Link */}
+              <Link href="/profile">
+                <a 
+                  onClick={toggleSidebar}
+                  className={`group flex items-center px-2 py-2 text-base font-medium rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                    currentPage === 'profile' 
+                      ? 'bg-primary/10 text-primary dark:bg-primary/20' 
+                      : 'text-gray-700 dark:text-gray-200'
+                  }`}
+                >
+                  <svg 
+                    className={`mr-4 h-6 w-6 ${currentPage === 'profile' ? 'text-primary' : 'text-gray-400 dark:text-gray-400'}`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24" 
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  </svg>
+                  <span className="truncate">
+                    {user?.name || "Profilo"}
+                  </span>
+                </a>
+              </Link>
+              
+              {/* Logout Button */}
+              <button
+                onClick={() => logoutMutation.mutate()}
+                className="w-full mt-2 group flex items-center px-2 py-2 text-base font-medium rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+              >
+                <svg className="mr-4 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                Logout
+              </button>
+            </div>
           </nav>
         </div>
       </div>
