@@ -15,33 +15,39 @@ export default function DashboardLayout({ children, currentPage }: DashboardLayo
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header 
-        user={user} 
-        isSidebarOpen={isSidebarOpen}
-        toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-      />
+      {/* Header - fixed at top */}
+      <div className="fixed top-0 left-0 right-0 z-30">
+        <Header 
+          user={user} 
+          isSidebarOpen={isSidebarOpen}
+          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
+      </div>
+      
+      {/* Spacer to account for fixed header */}
+      <div className="h-16"></div>
       
       <div className="flex flex-1">
-        {/* Sidebar (Desktop) */}
+        {/* Sidebar (Desktop) - fixed on the left */}
         <Sidebar currentPage={currentPage} role={user?.role} />
         
         {/* Mobile Sidebar */}
         <MobileNav 
-          isSidebarOpen={isSidebarOpen} 
+          isOpen={isSidebarOpen} 
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           currentPage={currentPage}
           role={user?.role}
         />
         
-        {/* Main Content */}
-        <div className="flex-1 overflow-auto focus:outline-none">
-          <main className="flex-1 relative pb-8 z-0">
+        {/* Main Content - this is the only part that should scroll */}
+        <div className="flex-1 lg:ml-64 overflow-auto focus:outline-none">
+          <main className="flex-1 relative pb-8 z-0 h-[calc(100vh-4rem)]">
             {children}
           </main>
         </div>
       </div>
       
-      {/* Mobile Bottom Navigation */}
+      {/* Mobile Bottom Navigation - fixed at bottom */}
       <div className="block lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-1 z-40">
         <div className="flex justify-around">
           <a href="/" className={`text-center py-2 px-2 rounded ${currentPage === 'dashboard' ? 'text-primary' : 'text-gray-500 dark:text-gray-400'}`}>
