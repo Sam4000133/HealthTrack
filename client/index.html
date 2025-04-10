@@ -1,25 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <style>
-      body {
-        background-color: #1a202c; /* dark background */
-        transition: background-color 0.2s ease;
-      }
-      html.light body {
-        background-color: #ffffff; /* light background */
-      }
-    </style>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      // Script to avoid flash during theme change
-      const theme = localStorage.getItem('theme') || 'dark';
-      document.documentElement.className = theme;
-    </script>
   </body>
 </html>
