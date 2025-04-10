@@ -87,13 +87,6 @@ export default function VitalChart({
     const sortedData = [...data].sort((a, b) => {
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
-    
-    // Sort previous period data if available
-    const sortedPreviousData = previousData 
-      ? [...previousData].sort((a, b) => {
-          return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
-        }) 
-      : [];
 
     // Create labels for all 7 days
     const labels = last7Days.map(day => day.dateString);
@@ -115,20 +108,6 @@ export default function VitalChart({
         // Return the value or null if no measurement for this day
         return measurement ? (getValue(measurement) as number) : null;
       });
-      
-      // Map previous period data if available
-      const mappedPreviousData = previousData ? last7Days.map(day => {
-        // Find a measurement from the previous period for this day
-        const measurement = sortedPreviousData.find(item => {
-          const itemDate = new Date(item.timestamp);
-          // We need to align the days between the two periods, so we're looking for 
-          // the same day of the week rather than the same calendar date
-          return itemDate.getDay() === day.date.getDay();
-        });
-        
-        // Return the value or null if no measurement for this day
-        return measurement ? (getValue(measurement) as number) : null;
-      }) : [];
 
       datasets = [
         {
@@ -141,21 +120,6 @@ export default function VitalChart({
           fill: true
         }
       ];
-      
-      // Add previous period data if available
-      if (previousData && previousData.length > 0) {
-        datasets.push({
-          label: "Periodo precedente",
-          data: mappedPreviousData,
-          borderColor: "#9ca3af",
-          backgroundColor: "rgba(156, 163, 175, 0)",
-          pointBackgroundColor: "#9ca3af",
-          borderDash: [5, 5],
-          pointRadius: 3,
-          tension: 0.2,
-          fill: false
-        });
-      }
 
       // Add upper limit line if provided
       if (upperLimit) {
@@ -220,40 +184,6 @@ export default function VitalChart({
           ? (getValue(measurement) as { systolic: number; diastolic: number; heartRate: number }).heartRate 
           : null;
       });
-      
-      // Map previous period data if available
-      const mappedPreviousSystolic = previousData ? last7Days.map(day => {
-        const measurement = sortedPreviousData.find(item => {
-          const itemDate = new Date(item.timestamp);
-          return itemDate.getDay() === day.date.getDay();
-        });
-        
-        return measurement 
-          ? (getValue(measurement) as { systolic: number; diastolic: number; heartRate: number }).systolic 
-          : null;
-      }) : [];
-      
-      const mappedPreviousDiastolic = previousData ? last7Days.map(day => {
-        const measurement = sortedPreviousData.find(item => {
-          const itemDate = new Date(item.timestamp);
-          return itemDate.getDay() === day.date.getDay();
-        });
-        
-        return measurement 
-          ? (getValue(measurement) as { systolic: number; diastolic: number; heartRate: number }).diastolic 
-          : null;
-      }) : [];
-      
-      const mappedPreviousHeartRate = previousData ? last7Days.map(day => {
-        const measurement = sortedPreviousData.find(item => {
-          const itemDate = new Date(item.timestamp);
-          return itemDate.getDay() === day.date.getDay();
-        });
-        
-        return measurement 
-          ? (getValue(measurement) as { systolic: number; diastolic: number; heartRate: number }).heartRate 
-          : null;
-      }) : [];
 
       datasets = [
         {
@@ -281,45 +211,6 @@ export default function VitalChart({
           tension: 0.2
         }
       ];
-      
-      // Add previous period data if available
-      if (previousData && previousData.length > 0) {
-        datasets.push(
-          {
-            label: "Sistolica prec.",
-            data: mappedPreviousSystolic,
-            borderColor: "#ef4444",
-            backgroundColor: "rgba(0, 0, 0, 0)",
-            pointBackgroundColor: "#ef4444",
-            borderDash: [5, 5],
-            pointRadius: 3,
-            tension: 0.2,
-            fill: false
-          },
-          {
-            label: "Diastolica prec.",
-            data: mappedPreviousDiastolic,
-            borderColor: "#10b981",
-            backgroundColor: "rgba(0, 0, 0, 0)",
-            pointBackgroundColor: "#10b981",
-            borderDash: [5, 5],
-            pointRadius: 3,
-            tension: 0.2,
-            fill: false
-          },
-          {
-            label: "Battito prec.",
-            data: mappedPreviousHeartRate,
-            borderColor: "#f97316",
-            backgroundColor: "rgba(0, 0, 0, 0)",
-            pointBackgroundColor: "#f97316",
-            borderDash: [5, 5],
-            pointRadius: 3,
-            tension: 0.2,
-            fill: false
-          }
-        );
-      }
     } else if (type === "weight") {
       // Map data to the 7 days
       const mappedData = last7Days.map(day => {
@@ -334,19 +225,6 @@ export default function VitalChart({
         // Return the value or null if no measurement for this day
         return measurement ? (getValue(measurement) as number) / 1000 : null; // Convert from grams to kg
       });
-      
-      // Map previous period data if available
-      const mappedPreviousData = previousData ? last7Days.map(day => {
-        // Find a measurement from the previous period for this day
-        const measurement = sortedPreviousData.find(item => {
-          const itemDate = new Date(item.timestamp);
-          // Match by day of week
-          return itemDate.getDay() === day.date.getDay();
-        });
-        
-        // Return the value or null if no measurement for this day
-        return measurement ? (getValue(measurement) as number) / 1000 : null; // Convert from grams to kg
-      }) : [];
 
       datasets = [
         {
@@ -359,21 +237,6 @@ export default function VitalChart({
           fill: true
         }
       ];
-      
-      // Add previous period data if available
-      if (previousData && previousData.length > 0) {
-        datasets.push({
-          label: "Periodo precedente",
-          data: mappedPreviousData,
-          borderColor: "#9ca3af",
-          backgroundColor: "rgba(156, 163, 175, 0)",
-          pointBackgroundColor: "#9ca3af",
-          borderDash: [5, 5],
-          pointRadius: 3,
-          tension: 0.2,
-          fill: false
-        });
-      }
     }
 
     // Create chart
@@ -418,7 +281,7 @@ export default function VitalChart({
         });
       }
     }
-  }, [data, isLoading, type, getValue, upperLimit, lowerLimit, previousData]);
+  }, [data, isLoading, type, getValue, upperLimit, lowerLimit]);
 
   // Calculate average if data available
   const calculateAverage = () => {
