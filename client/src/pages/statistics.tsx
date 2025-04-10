@@ -34,7 +34,7 @@ export default function Statistics() {
 
   // Fetch measurements based on selected type and period
   const { data: measurements, isLoading } = useQuery<MeasurementWithDetails[]>({
-    queryKey: ["/api/measurements/stats", selectedType, selectedPeriod],
+    queryKey: [`/api/measurements/stats/${selectedType}/${selectedPeriod}`],
   });
 
   // Get value functions for charts
@@ -42,10 +42,11 @@ export default function Statistics() {
     return measurement.glucose?.value || 0;
   };
 
-  const getBloodPressureValue = (measurement: MeasurementWithDetails): { systolic: number; diastolic: number } => {
+  const getBloodPressureValue = (measurement: MeasurementWithDetails): { systolic: number; diastolic: number; heartRate: number } => {
     return {
       systolic: measurement.bloodPressure?.systolic || 0,
-      diastolic: measurement.bloodPressure?.diastolic || 0
+      diastolic: measurement.bloodPressure?.diastolic || 0,
+      heartRate: measurement.bloodPressure?.heartRate || 0
     };
   };
 
@@ -94,20 +95,24 @@ export default function Statistics() {
     } else if (selectedType === "blood_pressure") {
       const systolicValues = measurements.map(m => m.bloodPressure?.systolic || 0).filter(v => v > 0);
       const diastolicValues = measurements.map(m => m.bloodPressure?.diastolic || 0).filter(v => v > 0);
+      const heartRateValues = measurements.map(m => m.bloodPressure?.heartRate || 0).filter(v => v > 0);
       
       const avgSystolic = systolicValues.reduce((sum, val) => sum + val, 0) / systolicValues.length;
       const avgDiastolic = diastolicValues.reduce((sum, val) => sum + val, 0) / diastolicValues.length;
+      const avgHeartRate = heartRateValues.reduce((sum, val) => sum + val, 0) / heartRateValues.length;
       
       const minSystolic = Math.min(...systolicValues);
       const minDiastolic = Math.min(...diastolicValues);
+      const minHeartRate = Math.min(...heartRateValues);
       
       const maxSystolic = Math.max(...systolicValues);
       const maxDiastolic = Math.max(...diastolicValues);
+      const maxHeartRate = Math.max(...heartRateValues);
       
       return {
-        average: formatBloodPressureValue(Math.round(avgSystolic), Math.round(avgDiastolic)),
-        min: formatBloodPressureValue(minSystolic, minDiastolic),
-        max: formatBloodPressureValue(maxSystolic, maxDiastolic),
+        average: formatBloodPressureValue(Math.round(avgSystolic), Math.round(avgDiastolic), Math.round(avgHeartRate)),
+        min: formatBloodPressureValue(minSystolic, minDiastolic, minHeartRate),
+        max: formatBloodPressureValue(maxSystolic, maxDiastolic, maxHeartRate),
         count: systolicValues.length
       };
     } else if (selectedType === "weight") {
