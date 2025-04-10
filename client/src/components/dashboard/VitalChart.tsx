@@ -15,6 +15,7 @@ import {
 } from "chart.js";
 import { MeasurementWithDetails } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 
 // Register Chart.js components
 Chart.register(
@@ -445,6 +446,57 @@ export default function VitalChart({
 
     return "N/A";
   };
+  
+  // Calculate trend percentage compared to previous period
+  const calculateTrendPercentage = () => {
+    if (!data.length || !previousData || !previousData.length) return null;
+
+    if (type === "glucose") {
+      const currentValues = data.map(item => getValue(item) as number);
+      const previousValues = previousData.map(item => getValue(item) as number);
+      
+      const currentAvg = currentValues.reduce((sum, val) => sum + val, 0) / currentValues.length;
+      const previousAvg = previousValues.reduce((sum, val) => sum + val, 0) / previousValues.length;
+      
+      if (previousAvg === 0) return null; // Avoid division by zero
+      
+      const percentChange = ((currentAvg - previousAvg) / previousAvg) * 100;
+      return {
+        percentage: Math.abs(percentChange).toFixed(1),
+        isHigher: percentChange > 0
+      };
+    } else if (type === "blood_pressure") {
+      const currentSystolicValues = data.map(item => (getValue(item) as { systolic: number; diastolic: number; heartRate: number }).systolic);
+      const previousSystolicValues = previousData.map(item => (getValue(item) as { systolic: number; diastolic: number; heartRate: number }).systolic);
+      
+      const currentSystolicAvg = currentSystolicValues.reduce((sum, val) => sum + val, 0) / currentSystolicValues.length;
+      const previousSystolicAvg = previousSystolicValues.reduce((sum, val) => sum + val, 0) / previousSystolicValues.length;
+      
+      if (previousSystolicAvg === 0) return null; // Avoid division by zero
+      
+      const percentChange = ((currentSystolicAvg - previousSystolicAvg) / previousSystolicAvg) * 100;
+      return {
+        percentage: Math.abs(percentChange).toFixed(1),
+        isHigher: percentChange > 0
+      };
+    } else if (type === "weight") {
+      const currentValues = data.map(item => getValue(item) as number);
+      const previousValues = previousData.map(item => getValue(item) as number);
+      
+      const currentAvg = currentValues.reduce((sum, val) => sum + val, 0) / currentValues.length;
+      const previousAvg = previousValues.reduce((sum, val) => sum + val, 0) / previousValues.length;
+      
+      if (previousAvg === 0) return null; // Avoid division by zero
+      
+      const percentChange = ((currentAvg - previousAvg) / previousAvg) * 100;
+      return {
+        percentage: Math.abs(percentChange).toFixed(1),
+        isHigher: percentChange > 0
+      };
+    }
+
+    return null;
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -469,8 +521,30 @@ export default function VitalChart({
           )}
         </div>
         <div className="border-t border-gray-200 dark:border-gray-700 px-5 py-3">
-          <div className="text-sm font-medium">
-            Media: <span className="text-gray-700 dark:text-gray-300">{isLoading ? <Skeleton className="h-4 w-16 inline-block" /> : calculateAverage()}</span>
+          <div className="text-sm font-medium flex items-center">
+            <span>Media:</span> 
+            <span className="ml-1 text-gray-700 dark:text-gray-300">
+              {isLoading ? <Skeleton className="h-4 w-16 inline-block" /> : calculateAverage()}
+            </span>
+            
+            {!isLoading && !isPreviousLoading && previousData && previousData.length > 0 && (
+              <>
+                {(() => {
+                  const trend = calculateTrendPercentage();
+                  if (!trend) return null;
+                  
+                  return (
+                    <div className={`ml-2 flex items-center text-xs font-medium ${trend.isHigher ? 'text-red-500' : 'text-green-500'}`}>
+                      {trend.isHigher ? 
+                        <ArrowUpIcon className="h-3 w-3 mr-0.5" /> : 
+                        <ArrowDownIcon className="h-3 w-3 mr-0.5" />
+                      }
+                      <span>{trend.percentage}%</span>
+                    </div>
+                  );
+                })()}
+              </>
+            )}
           </div>
         </div>
       </div>
