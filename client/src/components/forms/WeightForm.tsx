@@ -12,15 +12,22 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import { useMutation } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { it } from "date-fns/locale";
 
 // Create a custom schema for the form
 const weightFormSchema = z.object({
   weightKg: z.number()
     .min(1, "Il peso deve essere almeno 1 kg")
     .max(300, "Il peso non può superare 300 kg"),
+  condition: z.enum(["rest", "activity"]),
+  notes: z.string().optional(),
 });
 
 interface WeightFormProps {
@@ -32,11 +39,24 @@ interface WeightFormProps {
 
 export default function WeightForm({ timestamp, notes, onCancel, onSuccess }: WeightFormProps) {
   const { user } = useAuth();
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [formattedDateTime, setFormattedDateTime] = useState("");
+
+  useEffect(() => {
+    // Update the current date and time when the component mounts
+    const now = new Date();
+    setCurrentDateTime(now);
+    setFormattedDateTime(
+      format(now, "dd MMMM yyyy, HH:mm", { locale: it })
+    );
+  }, []);
 
   const form = useForm<z.infer<typeof weightFormSchema>>({
     resolver: zodResolver(weightFormSchema),
     defaultValues: {
       weightKg: 70,
+      condition: "rest",
+      notes: "",
     },
   });
 
@@ -47,11 +67,20 @@ export default function WeightForm({ timestamp, notes, onCancel, onSuccess }: We
       // Convert kg to grams for the API
       const valueInGrams = Math.round(formData.weightKg * 1000);
 
+      // Prepare notes with condition information
+      let noteText = formData.notes || "";
+      const conditionText = formData.condition === "rest" ? "A riposo" : "Dopo attività fisica";
+      if (noteText) {
+        noteText = `${conditionText}. ${noteText}`;
+      } else {
+        noteText = conditionText;
+      }
+
       const measurementData = {
         userId: user.id,
         value: valueInGrams,
-        timestamp: timestamp ? new Date(timestamp) : undefined,
-        notes,
+        timestamp: currentDateTime,
+        notes: noteText,
       };
 
       const res = await apiRequest("POST", "/api/measurements/weight", measurementData);
@@ -61,6 +90,11 @@ export default function WeightForm({ timestamp, notes, onCancel, onSuccess }: We
       queryClient.invalidateQueries({ queryKey: ["/api/measurements"] });
       queryClient.invalidateQueries({ queryKey: ["/api/measurements/latest"] });
       queryClient.invalidateQueries({ queryKey: ["/api/measurements/stats/weight"] });
+      form.reset({
+        weightKg: 70,
+        condition: "rest",
+        notes: "",
+      });
       onSuccess();
     },
   });
@@ -72,6 +106,12 @@ export default function WeightForm({ timestamp, notes, onCancel, onSuccess }: We
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md mb-4">
+          <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+            Data e ora: {formattedDateTime}
+          </p>
+        </div>
+
         <FormField
           control={form.control}
           name="weightKg"
@@ -95,6 +135,55 @@ export default function WeightForm({ timestamp, notes, onCancel, onSuccess }: We
               <FormDescription>
                 Inserisci il peso corporeo in chilogrammi (es. 70.5)
               </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="condition"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel>Condizione</FormLabel>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="flex flex-col space-y-1"
+                >
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="rest" />
+                    </FormControl>
+                    <FormLabel className="font-normal">A riposo</FormLabel>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="activity" />
+                    </FormControl>
+                    <FormLabel className="font-normal">Dopo attività fisica</FormLabel>
+                  </FormItem>
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Note</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Inserisci eventuali note (es. orario del giorno, abbigliamento indossato, ecc.)"
+                  className="resize-none"
+                  {...field}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

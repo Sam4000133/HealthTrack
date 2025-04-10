@@ -12,10 +12,15 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BLOOD_PRESSURE_THRESHOLDS, HEART_RATE_THRESHOLDS } from "@shared/constants";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import { useMutation } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { it } from "date-fns/locale";
 
 // Create a custom schema for the form
 const bloodPressureFormSchema = z.object({
@@ -29,6 +34,8 @@ const bloodPressureFormSchema = z.object({
     .min(HEART_RATE_THRESHOLDS.LOW, `Il valore deve essere almeno ${HEART_RATE_THRESHOLDS.LOW} BPM`)
     .max(220, "Il valore non può superare 220 BPM")
     .optional(),
+  condition: z.enum(["rest", "activity"]),
+  notes: z.string().optional(),
 });
 
 interface BloodPressureFormProps {
@@ -40,6 +47,17 @@ interface BloodPressureFormProps {
 
 export default function BloodPressureForm({ timestamp, notes, onCancel, onSuccess }: BloodPressureFormProps) {
   const { user } = useAuth();
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [formattedDateTime, setFormattedDateTime] = useState("");
+
+  useEffect(() => {
+    // Update the current date and time when the component mounts
+    const now = new Date();
+    setCurrentDateTime(now);
+    setFormattedDateTime(
+      format(now, "dd MMMM yyyy, HH:mm", { locale: it })
+    );
+  }, []);
 
   const form = useForm<z.infer<typeof bloodPressureFormSchema>>({
     resolver: zodResolver(bloodPressureFormSchema),
@@ -47,6 +65,8 @@ export default function BloodPressureForm({ timestamp, notes, onCancel, onSucces
       systolic: 120,
       diastolic: 80,
       heartRate: 72,
+      condition: "rest",
+      notes: "",
     },
   });
 
@@ -54,13 +74,22 @@ export default function BloodPressureForm({ timestamp, notes, onCancel, onSucces
     mutationFn: async (formData: z.infer<typeof bloodPressureFormSchema>) => {
       if (!user) throw new Error("Utente non autenticato");
 
+      // Prepare notes with condition information
+      let noteText = formData.notes || "";
+      const conditionText = formData.condition === "rest" ? "A riposo" : "Dopo attività fisica";
+      if (noteText) {
+        noteText = `${conditionText}. ${noteText}`;
+      } else {
+        noteText = conditionText;
+      }
+
       const measurementData = {
         userId: user.id,
         systolic: formData.systolic,
         diastolic: formData.diastolic,
         heartRate: formData.heartRate,
-        timestamp: timestamp ? new Date(timestamp) : undefined,
-        notes,
+        timestamp: currentDateTime,
+        notes: noteText,
       };
 
       const res = await apiRequest("POST", "/api/measurements/blood-pressure", measurementData);
@@ -70,6 +99,13 @@ export default function BloodPressureForm({ timestamp, notes, onCancel, onSucces
       queryClient.invalidateQueries({ queryKey: ["/api/measurements"] });
       queryClient.invalidateQueries({ queryKey: ["/api/measurements/latest"] });
       queryClient.invalidateQueries({ queryKey: ["/api/measurements/stats/blood_pressure"] });
+      form.reset({
+        systolic: 120,
+        diastolic: 80,
+        heartRate: 72,
+        condition: "rest",
+        notes: "",
+      });
       onSuccess();
     },
   });
@@ -81,6 +117,12 @@ export default function BloodPressureForm({ timestamp, notes, onCancel, onSucces
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md mb-4">
+          <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+            Data e ora: {formattedDateTime}
+          </p>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -162,6 +204,55 @@ export default function BloodPressureForm({ timestamp, notes, onCancel, onSucces
               <FormDescription>
                 Valori normali: {HEART_RATE_THRESHOLDS.NORMAL_MIN}-{HEART_RATE_THRESHOLDS.NORMAL_MAX} BPM (a riposo)
               </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="condition"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel>Condizione</FormLabel>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="flex flex-col space-y-1"
+                >
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="rest" />
+                    </FormControl>
+                    <FormLabel className="font-normal">A riposo</FormLabel>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="activity" />
+                    </FormControl>
+                    <FormLabel className="font-normal">Dopo attività fisica</FormLabel>
+                  </FormItem>
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Note</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Inserisci eventuali note (es. sintomi, farmaci assunti, ecc.)"
+                  className="resize-none"
+                  {...field}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
