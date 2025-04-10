@@ -15,7 +15,7 @@ export default function Sidebar({ currentPage, role }: SidebarProps) {
 
   return (
     <div className="hidden lg:flex lg:flex-shrink-0 fixed top-16 left-0 h-[calc(100vh-4rem)]">
-      <div className="flex flex-col w-64 h-full border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+      <div className="flex flex-col w-64 h-full border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 sidebar-bg">
         <div className="flex flex-col h-full pt-5 pb-4 overflow-y-auto">
           <nav className="mt-2 flex-1 px-2 space-y-1 flex flex-col h-full justify-between">
             <div className="space-y-1">

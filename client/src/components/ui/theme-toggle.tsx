@@ -2,38 +2,54 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 
 export default function ThemeToggle() {
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(true); // Default to dark for initial render
 
+  // Apply theme on component mount and when theme changes
   useEffect(() => {
-    // Get the initial theme from localStorage or system preference
-    const storedTheme = localStorage.getItem('darkMode');
-    if (storedTheme !== null) {
-      setIsDarkMode(storedTheme === 'true');
-    } else {
-      // Check system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setIsDarkMode(prefersDark);
-      localStorage.setItem('darkMode', String(prefersDark));
-    }
+    // Function to apply theme to document
+    const applyTheme = (darkMode: boolean) => {
+      if (darkMode) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+      }
+    };
 
-    // Apply theme to document
+    // Get the initial theme from localStorage or system preference
+    const getInitialTheme = () => {
+      const storedTheme = localStorage.getItem('darkMode');
+      if (storedTheme !== null) {
+        return storedTheme === 'true';
+      }
+      // Check system preference
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    };
+
+    // Initialize theme
+    const initialDarkMode = getInitialTheme();
+    setIsDarkMode(initialDarkMode);
+    applyTheme(initialDarkMode);
+    localStorage.setItem('darkMode', String(initialDarkMode));
+  }, []); // Empty dependency array means this runs once on mount
+
+  // Effect to handle theme changes
+  useEffect(() => {
+    // Apply theme to document when isDarkMode changes
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
     } else {
+      document.documentElement.classList.add('light');
       document.documentElement.classList.remove('dark');
     }
-  }, [isDarkMode]);
+  }, [isDarkMode]); // This runs when isDarkMode changes
 
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
     localStorage.setItem('darkMode', String(newMode));
-    
-    if (newMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
   };
 
   return (
