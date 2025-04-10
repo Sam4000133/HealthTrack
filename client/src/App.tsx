@@ -12,6 +12,7 @@ import Statistics from "@/pages/statistics";
 import Patients from "@/pages/patients";
 import UserManagement from "@/pages/user-management";
 import Profile from "@/pages/profile";
+import SecurityPage from "@/pages/security-page";
 
 function Router() {
   return (
@@ -22,6 +23,7 @@ function Router() {
       <ProtectedRoute path="/patients" component={Patients} roles={["admin", "doctor"]} />
       <ProtectedRoute path="/users" component={UserManagement} roles={["admin"]} />
       <ProtectedRoute path="/profile" component={Profile} />
+      <ProtectedRoute path="/security" component={SecurityPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>

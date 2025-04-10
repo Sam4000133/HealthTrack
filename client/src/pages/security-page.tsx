@@ -13,6 +13,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Shield, Lock, Key, AlertTriangle, RotateCw } from "lucide-react";
 
 export default function SecurityPage() {
+  const currentPage = "security";
   const { user } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("password");
@@ -166,7 +167,7 @@ export default function SecurityPage() {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout currentPage={currentPage}>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Sicurezza</h1>
         <Shield className="h-8 w-8 text-primary" />
